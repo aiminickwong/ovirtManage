@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    {%- block head %}
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{%- block title %}{%- endblock title %}</title>
+
+    {%- block styles %}
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css" >
+    <link rel="stylesheet" href="/static/font-awesome-4.7.0 /css/font-awesome.min.css" >
+    <link rel="stylesheet" href="/static/dist/css/jquery-confirm/3.2.0/jquery-confirm.min.css">
+
+    <link href="/static/css/vendors/nprogress/nprogress.css" rel="stylesheet">
+    <link href="/static/css/vendors/bootstrap-progressbar/css/bootstrap-progressbar-3.3.4.min.css" rel="stylesheet">
+
+
+    <!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/blueimp-gallery.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery.fileupload.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery.fileupload-ui.css') }}">
+    <link href="/static/css/vendors/bootstrap-progressbar/css/bootstrap-progressbar-3.3.4.min.css" rel="stylesheet">
+    <link href="/static/css/vendors/jqvmap/dist/jqvmap.min.css" rel="stylesheet"/>
+
+{#    <link href="/static/css/animate.min.css" rel="stylesheet">#}
+{#    <link href="/static/css/lightbox.css" rel="stylesheet">#}
+{#    <link href="/static/css/responsive.css" rel="stylesheet">#}
+
+    <link type="text/less" rel="stylesheet/less" rev="stylesheet/less" href="/static/build/less/dropdown.less" />
+
+
+    <link rel="stylesheet" href="/static/dist/css/AdminLTE.min.css">
+    <link rel="stylesheet" href="/static/dist/css/skins/_all-skins.css">
+
+    <link href="/static/bootstrap-table-master/src/bootstrap-table.css" rel="stylesheet" type="text/css" />
+
+    <link href="/static/select2-4.0.3/dist/css/select2.min.css" rel="stylesheet" type="text/css" />
+
+    {%- endblock styles %}
+
+  {%- endblock head %}
+  </head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+
+  <header class="main-header">
+    <!-- Logo -->
+    <a href="#" class="logo">
+      <!-- mini logo for sidebar mini 50x50 pixels -->
+      <span class="logo-mini"><b>O</b>vi</span>
+      <!-- logo for regular state and mobile devices -->
+      <span class="logo-lg"><b>M</b>anage</span>
+    </a>
+    <!-- Header Navbar: style can be found in header.less -->
+    <nav class="navbar navbar-static-top">
+      <!-- Sidebar toggle button-->
+      <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+        <span class="sr-only">Toggle navigation</span>
+      </a>
+
+      <div class="navbar-custom-menu">
+        <ul class="nav navbar-nav">
+          <!-- Messages: style can be found in dropdown.less-->
+          <li class="dropdown messages-menu">
+ 
+          </li>
+
+          <!-- User Account: style can be found in dropdown.less -->
+          <li class="dropdown user user-menu">
+{#            <a href="#" class="dropdown-toggle" data-toggle="dropdown">#}
+{#              <span class="hidden-xs">Alexander Pierce</span>#}
+                {% if current_user.is_authenticated %}
+
+                 <li class="">
+                   <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                     {{ current_user.username }}
+                     <span class=" fa fa-angle-down"></span>
+                   </a>
+                   <ul class="dropdown-menu dropdown-usermenu pull-right">
+
+                   <li><a href="{{ url_for('auth.logout') }}"><i class="fa fa-sign-out pull-right"></i> 退出登录</a></li>
+                  </ul>
+                 </li>
+                {% endif %}
+
+
+            </a>
+
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  {%- block sidebar %} {%- endblock sidebar %}
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+         <!-- Main content -->
+         {%- block content %} {%- endblock content %}
+  </div>
+  <!-- /.content-wrapper -->
+
+
+
+{%- block scripts%}
+    <script type="text/javascript" src="/static/dist/js/jquery/dist/jquery.min.js"></script>
+
+
+    <script type="text/javascript" src="/static/bootstrap/js/bootstrap.min.js"></script>
+
+{#    <script type="text/javascript" src="/static/js/lightbox.min.js"></script>#}
+{#    <script type="text/javascript" src="/static/js/wow.min.js"></script>#}
+{#    <script type="text/javascript" src="/static/js/main.js"></script>#}
+
+    <!-- Morris.js charts -->
+{#    <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>#}
+{#    <script src="plugins/morris/morris.min.js"></script>#}
+
+
+
+{#    <script src="plugins/daterangepicker/daterangepicker.js"></script>#}
+    <!-- Bootstrap WYSIHTML5 -->
+    <script src="/static/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js"></script>
+    <!-- Slimscroll -->
+    <script src="/static/plugins/slimScroll/jquery.slimscroll.min.js"></script>
+    <!-- FastClick -->
+    <script src="/static/plugins/fastclick/fastclick.js"></script>
+    <!-- AdminLTE App 这里禁了li点击事件-->
+    <script src="/static/dist/js/app.min.js"></script>
+    <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
+{#    <script src="/static/dist/js/pages/dashboard.js"></script>#}
+    <!-- AdminLTE for demo purposes -->
+{#    <script src="/static/dist/js/demo.js"></script>#}
+    <script src="/static/bootstrap-table-master/src/bootstrap-table.js"></script>
+    <script src="/static/bootstrap-table-master/src/locale/bootstrap-table-zh-CN.js"></script>
+    <script src="/static/bootstrap-table-master/src/extensions/editable/bootstrap-table-editable.js"></script>
+    <script src="/static/bootstrap-table-master/src/extensions/export/bootstrap-table-export.js"></script>
+{#    <script src="/static/build/bootstrap-editable.js"></script>#}
+    <script src="/static/dist/js/jquery-confirm/3.2.0/jquery-confirm.min.js"></script>
+    <script src="/static/select2-4.0.3/dist/js/select2.min.js"></script>
+
+
+
+    <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
+{#    <script src="/static/dist/js/pages/dashboard.js"></script>#}
+    <!-- AdminLTE for demo purposes -->
+{#    <script src="/static/dist/js/demo.js"></script>#}
+    <script>
+
+    </script>
+
+    {%- endblock scripts %}
+
+
+</div>
+</body>
+</html>

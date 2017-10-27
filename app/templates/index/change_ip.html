@@ -1,0 +1,334 @@
+{% extends "base.html" %}
+{% block title %}Ovirt | ISO文件上传{% endblock %}
+
+{% block styles %}
+    {{ super() }}
+    <style>
+
+        #terminal_message{
+           background: #26292e none repeat scroll 0 0;
+           color: #DFAE71;
+           border: medium none;
+           border-radius: 0;
+           box-shadow: none;
+           height: 300px;
+        }
+
+        h4{
+            color: #73879c;
+            font-family: "Helvetica Neue",Roboto,Arial,"Droid Sans",sans-serif;
+        }
+
+        #submit-form{
+           padding-left:250px;
+        }
+
+    </style>
+{% endblock %}
+
+
+{% block sidebar %}
+  <!-- Left side column. contains the logo and sidebar -->
+  <aside class="main-sidebar">
+    <!-- sidebar: style can be found in sidebar.less -->
+    <section class="sidebar">
+      <!-- Sidebar user panel -->
+      <div class="user-panel">
+        <div class="pull-left image">
+          <img src="dist/img/user2-160x160.jpg" class="img-circle" alt="User Image">
+        </div>
+        <div class="pull-left info">
+<!--           <p>Alexander Pierce</p> -->
+        </div>
+      </div>
+
+      <ul class="sidebar-menu">
+        <li class="header">MAIN NAVIGATION</li>
+        <li class="treeview">
+          <a href="#">
+            <i class="fa fa-user"></i> <span>用户管理</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu">
+            <li class="all-users"><a href= "{{ url_for('main.users') }}" ><i class="fa fa-circle-o"></i> 所有用户</a></li>
+{#            <li class="add-user"><a href= "javascript:void(0)" ><i class="fa fa-circle-o"></i> 新增用户</a></li>#}
+{#            <li class="set-pwd"><a href="#"><i class="fa fa-circle-o"></i> 设置密码与密码期限</a></li>#}
+{#            <li class="change-pwd"><a href="#"><i class="fa fa-circle-o"></i> 修改密码</a></li>#}
+          </ul>
+        </li>
+
+        <li class="treeview">
+          <a href="">
+            <i class="fa fa-group"></i> <span>用户组管理</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu">
+            <li><a href="{{ url_for('main.user_group') }}"><i class="fa fa-circle-o"></i> 所有用户组</a></li>
+{#            <li class="users-group"><a href= "javascript:void(0)" ><i class="fa fa-circle-o"></i> 新增用户组</a></li>#}
+          </ul>
+        </li>
+
+        <li class="active treeview">
+          <a href="">
+            <i class="fa fa-cog"></i> <span>IP管理</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+
+          <ul class="treeview-menu">
+            <li><a href="{{ url_for('main.change_ip') }}"><i class="fa fa-circle-o"></i>修改IP地址</a></li>
+          </ul>
+        </li>
+
+        <li class="treeview">
+          <a href="">
+            <i class="fa fa-cloud-upload"></i> <span>文件上传</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu">
+            <li><a href="{{ url_for('main.iso_file') }}"><i class="fa fa-circle-o"></i>ISO文件上传</a></li>
+          </ul>
+        </li>
+
+        <li class="treeview">
+          <a href="">
+            <i class="fa fa-laptop"></i> <span>资产管理</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu">
+            <li><a href="{{ url_for('main.remote') }}"><i class="fa fa-circle-o"></i>终端</a></li>
+          </ul>
+        </li>
+
+
+      </ul>
+    </section>
+    <!-- /.sidebar -->
+  </aside>
+
+{% endblock %}
+
+
+{% block content %}
+        <!-- page content -->
+        <div class="right_col" role="main">
+            <div class="row">
+                <div class="col-md-11">
+                    <br>
+                    <h4 align="center" >修改IP地址</h4>
+                </div>
+            </div>
+
+            <div id="toolbar"></div>
+            <br>
+            <br>
+
+            <div class="row" >
+
+                <div class="col-md-9">
+                    <form id="submit-form" name="contact-form" method="post">
+                        <div class="form-group">
+			   
+			    <p><b>hostname</b>: {{hostname}}</p>
+			    <p>IP地址:</p>
+                            <input type="text" name="ipaddr" class="form-control" value={{ipaddr}} required="required" placeholder="IP地址" autofocus="autofocus">
+                        </div>
+                        <div class="form-group">
+			    <p>子网掩码:</p>
+                            <input type="text" name="netmask" class="form-control" value={{netmask}} placeholder="子网掩码" autofocus="autofocus">
+                        </div>
+                        <div class="form-group">
+			    <p>网关:</p>
+                            <input type="text" name="gateway" class="form-control" value={{gateway}} placeholder="网关" autofocus="autofocus">
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" name="submit" class="btn btn btn-primary btn-submit" value="提交">
+                        </div>
+                    </form>
+                </div>
+            <br>
+            </div>
+        </div>
+
+
+{% endblock %}
+
+
+{% block scripts %}  
+    {{ super() }}
+
+    <!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
+    <script src="/static/js/vendors/jquery.ui.widget.js"></script>
+    <!-- The Templates plugin is included to render the upload/download listings -->
+    <script src="/static/blueimp/tmpl.min.js"></script>
+    <!-- The Load Image plugin is included for the preview images and image resizing functionality -->
+    <script src="/static/JavaScript-Load-Image-master/js/load-image.all.min.js"></script>
+    <!-- The Canvas to Blob plugin is included for image resizing functionality -->
+    <script src="/static/blueimp/canvas-to-blob.min.js"></script>
+    <!-- Bootstrap JS is not required, but included for the responsive demo navigation -->
+    <!-- <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script> -->
+    <!-- blueimp Gallery script -->
+    <script src="/static/blueimp/jquery.blueimp-gallery.min.js"></script>
+    <!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
+    <script src="/static/js/jquery.iframe-transport.js"></script>
+    <!-- The basic File Upload plugin -->
+    <script src="/static/js/jquery.fileupload.js"></script>
+    <!-- The File Upload processing plugin -->
+    <script src="/static/js/jquery.fileupload-process.js"></script>
+    <!-- The File Upload image preview & resize plugin -->
+    <script src="/static/js/jquery.fileupload-image.js"></script>
+    <!-- The File Upload audio preview plugin -->
+    <script src="/static/js/jquery.fileupload-audio.js"></script>
+    <!-- The File Upload video preview plugin -->
+    <script src="/static/js/jquery.fileupload-video.js"></script>
+    <!-- The File Upload validation plugin -->
+    <script src="/static/js/jquery.fileupload-validate.js"></script>
+    <!-- The File Upload user interface plugin -->
+    <script src="/static/js/jquery.fileupload-ui.js"></script>
+
+    <script src="/static/js/vendors/bootstrap-progressbar/bootstrap-progressbar.min.js"></script>
+
+    <!-- 没有这个不能上传文件 -->
+    <script src="/static/js/main.js"></script>
+
+
+    <!-- Bootstrap -->
+
+    <!-- NProgress -->
+    <script src="/static/vendors/nprogress/nprogress.js"></script>
+    <!-- Chart.js -->
+    <script src="/static/vendors/Chart.js/dist/Chart.min.js"></script>
+    <!-- gauge.js -->
+    <script src="/static/vendors/gauge.js/dist/gauge.min.js"></script>
+    <!-- bootstrap-progressbar -->
+    <script src="/static/vendors/bootstrap-progressbar/bootstrap-progressbar.min.js"></script>
+    <!-- iCheck -->
+    <script src="/static/vendors/iCheck/icheck.min.js"></script>
+    <!-- Skycons -->
+    <script src="/static/vendors/skycons/skycons.js"></script>
+    <!-- Flot -->
+    <script src="/static/vendors/Flot/jquery.flot.js"></script>
+    <script src="/static/vendors/Flot/jquery.flot.pie.js"></script>
+    <script src="/static/vendors/Flot/jquery.flot.time.js"></script>
+    <script src="/static/vendors/Flot/jquery.flot.stack.js"></script>
+    <script src="/static/vendors/Flot/jquery.flot.resize.js"></script>
+    <!-- Flot plugins -->
+    <script src="/static/vendors/flot.orderbars/js/jquery.flot.orderBars.js"></script>
+    <script src="/static/vendors/flot-spline/js/jquery.flot.spline.min.js"></script>
+    <script src="/static/vendors/flot.curvedlines/curvedLines.js"></script>
+    <!-- DateJS -->
+    <script src="/static/vendors/DateJS/build/date.js"></script>
+    <!-- JQVMap -->
+    <script src="/static/vendors/jqvmap/dist/jquery.vmap.js"></script>
+    <script src="/static/vendors/jqvmap/dist/maps/jquery.vmap.world.js"></script>
+    <script src="/static/vendors/jqvmap/examples/js/jquery.vmap.sampledata.js"></script>
+
+
+    <script>
+        $(document).ready(function(){
+            $('.delete').click(function (e) {
+
+                $.confirm({
+                       title: '删除文件',
+                       content: '确定删除？',
+                       useBootstrap: true,
+                       buttons: {
+                           confirm: {
+                               text: '确定',
+                               action: function() {
+                                   $.ajax({
+                                       type: "post",
+                                       url: "/user_group_member",
+                                       async: false,
+                                       data: {
+                                           'group': Request["group"],
+                                           'remove_user': remove_user,
+                                       },
+                                       dataType: 'JSON',
+                                       success: function (data, status) {
+                                           if (status == "success") {
+                                           }
+                                       },
+                                       complete: function () {
+
+                                       }
+                                    });
+                               }
+                           },
+                           cancel: {
+                               text: '取消',
+                           },
+                       }
+                   });
+            });
+        });
+
+        //表单信息构造 json结构
+        $.fn.serializeObject = function() {
+            var o = {};
+            var a = this.serializeArray();
+            $.each(a, function() {
+                if (o[this.name]) {
+                    if (!o[this.name].push) {
+                        o[this.name] = [o[this.name]];
+                    }
+                    o[this.name].push(this.value || '');
+                } else {
+                    o[this.name] = this.value || '';
+                }
+            });
+            return o;
+        };
+
+        $('#submit-form').submit(function(e){
+            e.preventDefault();
+            var data  = {
+                data:JSON.stringify({"data":$(this).serializeObject() })
+            }
+
+            $.ajax({
+                type:"POST",
+                dataType:"json",
+                url:'/change_ip',
+                async: false,
+                data:data,
+                success: function (data, status) {
+                    if (status == "success") {
+                        //alert(data["message"]);
+{#                        $('#terminal_message').text(data["message"]) ;#}
+{#                        $('#user_list').bootstrapTable('refresh', {url: '/users_return_json'});#}
+                    }
+                },
+                complete: function () {
+                     }
+            });
+           });
+
+
+
+    </script>
+
+
+
+
+
+
+
+
+
+
+{#    <!-- The XDomainRequest Transport is included for cross-domain file deletion for IE 8 and IE 9 -->#}
+{#    <!--[if (gte IE 8)&(lt IE 10)]>#}
+{#        <script src="js/cors/jquery.xdr-transport.js"></script>#}
+{#    <![endif]-->#}
+
+{% endblock %}

@@ -1,0 +1,656 @@
+{% extends "base.html" %}
+{% block title %}Ovirt | 用户管理{% endblock %}
+
+{% block styles %}
+    {{ super() }}
+    <style>
+       .user_content{  
+            position: relative;
+            margin-top: 30px;
+            margin-left: -25px;
+       }
+
+       #delete-users{
+           background-color: #EB8848;
+	   color:white;
+       }
+
+       .del-user{
+           color: #EB8848;
+       }
+
+       .modal-title{
+           text-align:center;
+       }
+       #terminal_message{
+           background: #26292e none repeat scroll 0 0;
+           color: #DFAE71;
+           border: medium none;
+           border-radius: 0;
+           box-shadow: none;
+           height: 300px;
+       }
+
+        .bootstrap-table{
+            border-top:  15px solid #3C8DBC ;
+        }
+    </style>
+{% endblock %}
+
+
+{% block sidebar %}
+  <!-- Left side column. contains the logo and sidebar -->
+  <aside class="main-sidebar">
+    <!-- sidebar: style can be found in sidebar.less -->
+    <section class="sidebar">
+      <!-- Sidebar user panel -->
+      <div class="user-panel">
+        <div class="pull-left image">
+          <img src="dist/img/user2-160x160.jpg" class="img-circle" alt="User Image">
+        </div>
+        <div class="pull-left info">
+<!--           <p>Alexander Pierce</p> -->
+        </div>
+      </div>
+
+      <ul class="sidebar-menu">
+        <li class="header">MAIN NAVIGATION</li>
+        <li class="active treeview">
+          <a href="#">
+            <i class="fa fa-user"></i> <span>用户管理</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu">
+            <li class="active all-users"><a href= "{{ url_for('main.users') }}" ><i class="fa fa-circle-o"></i> 所有用户</a></li>
+{#            <li class="add-user"><a href= "javascript:void(0)" ><i class="fa fa-circle-o"></i> 新增用户</a></li>#}
+{#            <li class="set-pwd"><a href="#"><i class="fa fa-circle-o"></i> 设置密码与密码期限</a></li>#}
+{#            <li class="change-pwd"><a href="#"><i class="fa fa-circle-o"></i> 修改密码</a></li>#}
+          </ul>
+        </li>
+
+        <li class="treeview">
+          <a href="">
+            <i class="fa fa-group"></i> <span>用户组管理</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu">
+            <li><a href="{{ url_for('main.user_group') }}"><i class="fa fa-circle-o"></i> 所有用户组</a></li>
+{#            <li class="users-group"><a href= "javascript:void(0)" ><i class="fa fa-circle-o"></i> 新增用户组</a></li>#}
+
+          </ul>
+        </li>
+
+        <li class="treeview">
+          <a href="">
+            <i class="fa fa-cog"></i> <span>IP管理</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu">
+            <li><a href="{{ url_for('main.change_ip') }}"><i class="fa fa-circle-o"></i>修改IP地址</a></li>
+          </ul>
+        </li>
+
+        <li class="treeview">
+          <a href="">
+            <i class="fa fa-cloud-upload"></i> <span>文件上传</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu">
+            <li><a href="{{ url_for('main.iso_file') }}"><i class="fa fa-circle-o"></i> ISO文件上传</a></li>
+          </ul>
+        </li>
+
+        <li class="treeview">
+          <a href="">
+            <i class="fa fa-laptop"></i> <span>终端管理</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu">
+            <li><a href="{{ url_for('main.vnc') }}"><i class="fa fa-circle-o"></i>远程连接终端</a></li>
+          </ul>
+        </li>
+
+      </ul>
+    </section>
+    <!-- /.sidebar -->
+  </aside>
+
+
+
+{% endblock %}
+
+
+
+{% block content %}
+    <section class="content">
+      <!-- users list -->
+      <div class="row user_content">
+         <div class="col-md-12" >
+
+            <div class="fixed-table-container" id="table_container" >
+                    <div class="fixed-table-header" >
+                          <table class="table table-hover  " id="user_list" >
+                    <div id="toolbar">
+
+                        <a  href="javascript:void(0);" class="add-user btn btn-primary " ><i class="glyphicon glyphicon-plus"></i>新建</a>
+
+                        <button id='delete-users' class="btn btn-default" disabled title="删除多个用户"><i class="glyphicon glyphicon-remove"></i>删除</button>
+
+                    </div>
+
+                          </table>
+                    </div>    
+             </div>              
+        </div>
+      </div>
+    </section>
+
+    <!-- 模态框（Modal） -->
+	<div class="modal fade" id="add-user-modal" tabindex="-1" role="dialog"
+   	    aria-labelledby="myModalLabel" aria-hidden="true">
+   	<div class="modal-dialog" style="width:500px;">
+            <div class="modal-content">
+                <div class="modal-header">
+            	<button type="button" class="close"
+               	    data-dismiss="modal" aria-hidden="true">
+                    &times;
+            	</button>
+            	<h5 class="modal-title" id="myModalLabel">
+                      新建用户
+            	</h5>
+            </div>
+            <div class="modal-body">
+
+            <!-- page content -->
+            <form id="submit-form" name="contact-form" method="post">
+                <div class="form-group">
+                    <input type="text" name="name" class="form-control" required="required" placeholder="用户名" autofocus="autofocus">
+                </div>
+                <div class="form-group">
+                    <input type="text" name="firstname" class="form-control" placeholder="firstName">
+                </div>
+                <div class="form-group">
+                    <input type="text" name="lastname" class="form-control" placeholder="lastName">
+                </div>
+                <div class="form-group">
+                    <textarea name="message" id="terminal_message"  class="form-control" rows="8" placeholder="Terminal Message" disabled></textarea>
+                </div>
+                <div class="form-group">
+                    <input type="submit" name="submit" class="btn btn btn-primary btn-submit" value="Submit">
+                </div>
+            </form>
+            <!-- /page content -->
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default"
+                   data-dismiss="modal">close
+                </button>
+{#                <button type="button" id='modal_print' class="btn btn-primary">#}
+{#                  <i class="glyphicon glyphicon-print"></i> submit#}
+{#            	</button>#}
+            </div>
+          </div><!-- /.modal-content -->
+	 </div><!-- /.modal -->
+    </div>
+
+    <!-- 模态框（Modal） -->
+
+	<div class="modal fade" id="del-user-modal" tabindex="-1" role="dialog"
+   	    aria-labelledby="delModalLabel" aria-hidden="true">
+
+   	<div class="modal-dialog" style="width:500px;">
+            <div class="modal-content">
+                <div class="modal-header">
+            	<button type="button" class="close"
+               	    data-dismiss="modal" aria-hidden="true">
+                    &times;
+            	</button>
+            	<h5 class="modal-title" >
+                      删除用户
+            	</h5>
+            </div>
+            <div class="modal-body">
+
+            <!-- page content -->
+            <form id="submit-form" name="contact-form" method="post">
+
+                <div class="form-group">
+                    <textarea name="message" id="terminal_message"  class="form-control" rows="8" placeholder="Terminal Message" disabled></textarea>
+                </div>
+
+            </form>
+            <!-- /page content -->
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default"
+                   data-dismiss="modal">close
+                </button>
+{#                <button type="button" id='modal_print' class="btn btn-primary">#}
+{#                  <i class="glyphicon glyphicon-print"></i> submit#}
+{#            	</button>#}
+            </div>
+          </div><!-- /.modal-content -->
+	 </div><!-- /.modal -->
+
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+       <script>
+        function initTable() {
+           window.operateEvents = {
+            'click .del-user': function (e, value, row, index) {
+               var del_user = row.Name;
+
+               $.confirm({
+                    title: '删除用户',
+                    content: '确定删除' + row.Name + '?',
+                    useBootstrap: true,
+                    buttons: {
+
+                    confirm: {
+                      text: '确定',
+                      action: function(){
+                          $.ajax({
+                              type: "post",
+                              url: "/users",
+                              async: false,
+                              data:{
+                                'del_user':del_user,
+                              },
+                              dataType: 'JSON',
+                              success: function (data, status) {
+                                  if (status == "success") {
+                                  //$('#terminal_message').text(data["message"]) ;
+                                  //alert('del');
+                                  $('#user_list').bootstrapTable('refresh', {url: '/users_return_json'});
+                                  }
+                              },
+                              complete: function () {
+                              }
+                          });
+                      }
+                    },
+                    cancel: {
+                        text: '取消',
+                        //$.alert('取消!');
+                    },
+                    }
+                });
+               },
+
+            'click .unlock-user': function (e, value, row, index) {
+               var unlock_user = row.Name;
+
+               $.confirm({
+                    title: '解锁用户',
+                    content: '确定解锁' + row.Name + '?',
+                    useBootstrap: true,
+                    buttons: {
+                    confirm: {
+                        text: '确定',
+                        action:function () {
+                            $.ajax({
+                            type: "post",
+                            url: "/users",
+                            async: false,
+                            data:{
+                                'unlock_user':unlock_user,
+                            },
+                            dataType: 'JSON',
+                            success: function (data, status) {
+                                if (status == "success") {
+                                //$('#user_list').bootstrapTable('refresh', {url: '/users_return_json'});
+                                }
+                            },
+                            complete: function () {
+                            }
+                        });
+                        //$.alert('确认!');
+                        },
+                    },
+                    cancel: {
+                        text: '取消'
+                        //$.alert('取消!');
+                    },
+                    }
+                });
+               },
+            //设置密码
+            'click .set-pwd': function (e, value, row, index) {
+                var set_pwd_name = row.Name;
+
+                $.confirm({
+                    title: '设置密码',
+                    content: '' +
+                        '<form action="" class="setPwdForm">' +
+                        '<div class="form-group">' +
+                        '<label>输入密码</label>' +
+                        '<input type="password" placeholder="Your password" class="password form-control" required />' +
+                        '</div>' +
+                        '</form>',
+                    buttons: {
+                    formSubmit: {
+                        text: '提交',
+                        btnClass: 'btn-blue',
+                        action: function () {
+                            var pwd = this.$content.find('.password').val();
+                            if(!pwd){
+                                $.alert('请输入有效密码...');
+                                return false;
+                            }
+                            if(pwd.length < 6){
+                                $.alert('请输入至少6位密码...');
+                                return false;
+                            }
+                            $.ajax({
+                                type: "post",
+                                url: "/users",
+                                async: false,
+                                data:{
+                                    'set_pwd_name':set_pwd_name,
+                                    'set_pwd':pwd,
+                                },
+                                dataType: 'JSON',
+                                success: function (data, status) {
+                                    if (status == "success") {
+                                        //$('#user_list').bootstrapTable('refresh', {url: '/users_return_json'});
+                                    }
+                                },
+                                complete: function () {
+                                }
+                            });
+                            }
+                        },
+                        cancel:  {
+                            text: '取消'
+                        //close
+                        },
+                    },
+                    onContentReady: function () {
+                        // bind to events
+                        var jc = this;
+                        this.$content.find('.setPwdForm').on('submit', function (e) {
+                            // if the user submits the form by pressing enter in the field.
+
+                            e.preventDefault();
+                            return false;
+                            jc.$$formSubmit.trigger('click'); // reference the button and click it
+                        });
+                    }
+                });
+
+               },
+
+            //修改密码
+{#            'click .change-pwd': function (e, value, row, index) {#}
+{#                var change_pwd_name = row.Name;#}
+{##}
+{#                $.confirm({#}
+{#                    title: '修改密码',#}
+{#                    content: '' +#}
+{#                        '<form action="" class="changePwdForm">' +#}
+{#                        '<div class="form-group">' +#}
+{#                        '<label>输入密码</label>' +#}
+{#                        '<input type="password" placeholder="Your password" class="change_password form-control" required />' +#}
+{#                        '</div>' +#}
+{#                        '</form>',#}
+{#                    buttons: {#}
+{#                    formSubmit: {#}
+{#                        text: '提交',#}
+{#                        btnClass: 'btn-blue',#}
+{#                        action: function () {#}
+{#                            var pwd = this.$content.find('.change_password').val();#}
+{#                            if(!pwd){#}
+{#                                $.alert('请输入有效密码...');#}
+{#                                return false;#}
+{#                            }#}
+{#                            $.ajax({#}
+{#                                type: "post",#}
+{#                                url: "/users",#}
+{#                                async: false,#}
+{#                                data:{#}
+{#                                    'change_pwd_name':change_pwd_name,#}
+{#                                    'change_pwd':pwd,#}
+{#                                },#}
+{#                                dataType: 'JSON',#}
+{#                                success: function (data, status) {#}
+{#                                    if (status == "success") {#}
+{#                                        //$('#user_list').bootstrapTable('refresh', {url: '/users_return_json'});#}
+{#                                    }#}
+{#                                },#}
+{#                                complete: function () {#}
+{#                                }#}
+{#                            });#}
+{##}
+{#                            }#}
+{#                        },#}
+{#                        cancel: {#}
+{#                            text:'取消'#}
+{#                        //close#}
+{#                        },#}
+{#                    },#}
+{#                    onContentReady: function () {#}
+{#                        // bind to events#}
+{#                        var jc = this;#}
+{#                        this.$content.find('changePwdForm').on('submit', function (e) {#}
+{#                            // if the user submits the form by pressing enter in the field.#}
+{#                            e.preventDefault();#}
+{#                            jc.$$formSubmit.trigger('click'); // reference the button and click it#}
+{#                        });#}
+{#                    }#}
+{#                });#}
+{#               },#}
+           }
+
+        $("#user_list").bootstrapTable({
+{#            method: "get",  //使用get请求到服务器获取数据#}
+            url: '/users_return_json',
+            striped: true,  //表格显示条纹
+            pagination: true, //启动分页
+            pageSize: 50,  //每页显示的记录数
+            pageNumber:1, //当前第几页
+            pageList: [5, 10, 15, 20, 25,50,100,150,200],  //记录数可选列表
+            search: true,  //是否启用查询
+            showColumns: true,  //显示下拉框勾选要显示的列
+            showRefresh: true,  //显示刷新按钮
+            singleSelect: false,
+            checkboxHeader:true,
+            detailFormatter:true,
+            checkboxHeader:true,
+            uniqueId:"Name",
+            toolbar: '#toolbar',
+            toolbarAlign:"left",
+            sidePagination: "client",
+            paginationVAlign:'top',
+            paginationHAlign:'right',
+            showExport:false,
+            exportDataType: 'all',
+{#            basic', 'all', 'selected'.#}
+            sortOrder: 'desc',
+            locale: "zh-CN",
+            toolbarAlign:'left',
+            toolbar: '#toolbar',
+            columns: [{
+                field: 'state',
+                checkbox: true,
+            },{
+                field: 'Name',
+                title: '用户名',
+                align: 'left',
+            },{
+                field: 'First Name',
+                title: 'First Name',
+                align: 'left',
+            },{
+                field: 'Last Name',
+                title: 'Last Name',
+                align: 'left',
+            },{
+                field: 'Display Name',
+                title: 'Display Name',
+                align: 'left',
+            },{
+                field: 'Email',
+                title: 'Email',
+                align: 'left',
+            },{
+                field: 'Department',
+                title: 'Department',
+                align: 'left',
+            },{
+                field: 'Title',
+                title: 'Title',
+                align: 'left',
+            },{
+                field: 'Description',
+                title: 'Description',
+                align: 'left',
+            },{
+                field: 'Account Disabled',
+                title: 'Account Disabled',
+                align: 'left',
+            },{
+                field: 'Account Unlocked At',
+                title: 'Account Unlocked At',
+                align: 'left',
+            },{
+                field: 'operate',
+                title: 'operate',
+                align: 'left',
+                events: operateEvents,
+                formatter: operateFormatter
+            }],
+            queryParamsType : "undefined",
+            onEditableSave: function (field, row, oldValue, $el) {
+             }
+        });
+
+        function operateFormatter(value, row, index) {
+             //var name = getNameSelections();
+                return [
+            '<a class="del-user" href="javascript:;"  data-gallery  title="删除用户" >',
+{#            '<i class="glyphicon glyphicon-remove"></i>',#}'删除',
+            '</a>',' ',
+            '<a class="unlock-user" href="javascript:;" title="解锁用户">',
+{#            '<i class="glyphicon glyphicon-remove"></i>',#}'解锁',
+            ' ',
+            '</a>',' ',
+            '<a class="set-pwd" href="javascript:;" title="设置密码与密码期限">',
+{#            '<i class="glyphicon glyphicon-remove"></i>',#}'设置密码',
+            ' ',
+
+
+            ].join('');
+           }
+        };
+
+        $(document).ready(function(){
+            //调用函数，初始化表格
+            initTable();
+            $('.add-user').click(function(){
+                //alert('yes');
+                $('#add-user-modal').modal('toggle');
+            });
+
+	    var $table = $('#user_list'),$remove = $('#delete-users');
+
+            function getNameSelections() {
+                return $.map($table.bootstrapTable('getSelections'), function (row) {
+                    return row.Name
+               });
+            }
+
+	  //selections = []; 
+
+          $table.on('check.bs.table uncheck.bs.table ' +
+                'check-all.bs.table uncheck-all.bs.table', function () {
+	    //set remove a button 	 
+            $remove.prop('disabled', !$table.bootstrapTable('getSelections').length);
+            
+	    // save your data, here just save the current page
+                selections = getNameSelections();
+
+            // push or splice the selections if you want to save all data selections
+
+            });
+
+
+            $remove.click(function () {
+
+		var data  = {
+                     delete_users:JSON.stringify({"data":selections })
+                 }
+
+                $.ajax({
+                    type:'POST',
+                    url:'/users',
+                    async: false,
+                    data:data,
+                    dataType:'json',
+                    success:function(data){
+			$('#user_list').bootstrapTable('refresh', {url: '/users_return_json'});
+		    },
+                    error:function(xhr,type){}
+                });
+            });
+
+        })
+
+        //表单信息构造 json结构
+        $.fn.serializeObject = function() {
+            var o = {};
+            var a = this.serializeArray();
+            $.each(a, function() {
+                if (o[this.name]) {
+                    if (!o[this.name].push) {
+                        o[this.name] = [o[this.name]];
+                    }
+                    o[this.name].push(this.value || '');
+                } else {
+                    o[this.name] = this.value || '';
+                }
+            });
+            return o;
+        };
+
+           $('#submit-form').submit(function(e){
+                 e.preventDefault();
+                 var data  = {
+                     data:JSON.stringify({"data":$(this).serializeObject() })
+                 }
+
+                 $.ajax({
+                     type:"POST",
+                     dataType:"json",
+                     url:'/users',
+                     async: false,
+                     data:data,
+                     success: function (data, status) {
+                         if (status == "success") {
+                             //alert(data["message"]);
+                             $('#terminal_message').text(data["message"]) ;
+                             $('#user_list').bootstrapTable('refresh', {url: '/users_return_json'});
+                         }
+                     },
+                     complete: function () {
+                     }
+                 });
+           });
+        </script>
+
+{% endblock %}

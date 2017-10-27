@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Ovirt | 新建用户 {% endblock %}
+
+{% block content %}
+ <section id="home-slider">
+        <div class="container">
+            <div class="main-slider">
+
+                <div class="col-md-4 col-sm-12">
+                    <div class="contact-form bottom">
+                        <h3>新建用户</h3>
+                        <form id="main-contact-form" name="contact-form" method="post">
+                            <div class="form-group">
+                                <input type="text" name="name" class="form-control" required="required" placeholder="Name" autofocus="autofocus">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="firstname" class="form-control" required="required" placeholder="firstName">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="lastname" class="form-control" required="required" placeholder="lastName">
+                            </div>
+<!--                             <div class="form-group">
+                                <textarea name="message" id="message" required="required" class="form-control" rows="8" placeholder="Your text here"></textarea>
+                            </div>   -->                      
+                            <div class="form-group">
+                                <input type="submit" name="submit" class="btn btn-submit" value="Submit">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-12  terminal">
+                            <h3>Terminal Message:</h3>
+                            <textarea id="terminal_message" placeholder=" " name="message" rows="15" cols="40">{{ message}}</textarea>
+                </div>
+
+
+ -->    </section>
+
+
+
+{% endblock %}

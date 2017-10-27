@@ -1,0 +1,9 @@
+# -*- coding:utf-8 -*-
+__author__ = 'xuan'
+
+from flask import  Blueprint
+
+views = Blueprint('views',__name__)
+
+
+from . import account

@@ -1,0 +1,369 @@
+{% extends "base.html" %}
+{% block title %}Ovirt | 用户组成员{% endblock %}
+
+{% block styles %}
+    {{ super() }}
+    <style>
+       .user_content{  
+            position: relative;
+            margin-top: 30px;
+            margin-left: -25px;
+       }
+
+       .remove-user{
+{#           color: #BD9662;#}
+       }
+
+       .modal-title{
+           text-align:center;
+       }
+       #terminal_message{
+           background: #26292e none repeat scroll 0 0;
+           color: #DFAE71;
+           border: medium none;
+           border-radius: 0;
+           box-shadow: none;
+           height: 300px;
+       }
+
+        .bootstrap-table{
+            border-top:  15px solid #3C8DBC ;
+        }
+    </style>
+{% endblock %}
+
+
+{% block sidebar %}
+  <!-- Left side column. contains the logo and sidebar -->
+  <aside class="main-sidebar">
+    <!-- sidebar: style can be found in sidebar.less -->
+    <section class="sidebar">
+      <!-- Sidebar user panel -->
+      <div class="user-panel">
+        <div class="pull-left image">
+          <img src="dist/img/user2-160x160.jpg" class="img-circle" alt="User Image">
+        </div>
+        <div class="pull-left info">
+<!--           <p>Alexander Pierce</p> -->
+        </div>
+      </div>
+
+      <ul class="sidebar-menu">
+        <li class="header">MAIN NAVIGATION</li>
+        <li class="treeview">
+          <a href="#">
+            <i class="fa fa-user"></i> <span>用户管理</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu">
+            <li class="all-users"><a href= "{{ url_for('main.users') }}" ><i class="fa fa-circle-o"></i> 所有用户</a></li>
+{#            <li class="add-user"><a href= "javascript:void(0)" ><i class="fa fa-circle-o"></i> 新增用户</a></li>#}
+{#            <li class="set-pwd"><a href="#"><i class="fa fa-circle-o"></i> 设置密码与密码期限</a></li>#}
+{#            <li class="change-pwd"><a href="#"><i class="fa fa-circle-o"></i> 修改密码</a></li>#}
+          </ul>
+        </li>
+
+        <li class="active treeview">
+          <a href="">
+            <i class="fa fa-user"></i> <span>用户组管理</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu">
+            <li class=""><a href="{{ url_for('main.user_group') }}"><i class="fa fa-circle-o"></i> 所有用户组</a></li>
+{#            <li class="active"><a href="{{ url_for('main.user_group_member') }}"><i class="fa fa-circle-o"></i> 用户组成员</a></li>#}
+
+{#            <li class="add-user-group"><a href= "javascript:void(0)" ><i class="fa fa-circle-o"></i> 新增用户组</a></li>#}
+
+
+          </ul>
+        </li>
+
+        <li class="treeview">
+          <a href="#">
+            <i class="fa fa-cloud-upload"></i>
+            <span>文件上传</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+        </li>
+
+      </ul>
+    </section>
+    <!-- /.sidebar -->
+  </aside>
+
+{% endblock %}
+
+{% block content %}
+    <section class="content">
+      <p class="group_mem">用户组成员:{{ group_mem }}</p>
+      <!-- users list -->
+      <div class="row user_content">
+         <div class="col-md-12" >
+{#             <button id="remove" class="btn btn-danger" disabled>#}
+{#                 <i class="glyphicon glyphicon-remove"></i> 删除多个#}
+{#             </button>#}
+
+            <div class="fixed-table-container" id="table_container" >
+                    <div class="fixed-table-header" >
+                          <table class="table table-hover  " id="user_group_member" >
+
+                          </table>
+                    </div>
+            </div>
+        </div>
+      </div>
+    </section>
+
+{#    <!-- 模态框（Modal） -->#}
+{#	<div class="modal fade" id="add-user-group-modal" tabindex="-1" role="dialog"#}
+{#   	    aria-labelledby="myModalLabel" aria-hidden="true">#}
+{#   	<div class="modal-dialog" style="width:500px;">#}
+{#            <div class="modal-content">#}
+{#                <div class="modal-header">#}
+{#            	<button type="button" class="close"#}
+{#               	    data-dismiss="modal" aria-hidden="true">#}
+{#                    &times;#}
+{#            	</button>#}
+{#            	<h5 class="modal-title" id="myModalLabel">#}
+{#                      新建用户组#}
+{#            	</h5>#}
+{#            </div>#}
+{#            <div class="modal-body">#}
+{##}
+{#            <!-- page content -->#}
+{#            <form id="submit-form" name="contact-form" method="post">#}
+{#                <div class="form-group">#}
+{#                    <input type="text" name="group" class="form-control" required="required" placeholder="group" autofocus="autofocus">#}
+{#                </div>#}
+{#                <div class="form-group">#}
+{#                    <input type="text" name="description" class="form-control" required="required" placeholder="description" autofocus="autofocus">#}
+{#                </div>#}
+{#                <div class="form-group">#}
+{#                    <textarea name="message" id="terminal_message"  class="form-control" rows="8" placeholder="Terminal Message" disabled></textarea>#}
+{#                </div>#}
+{#                <div class="form-group">#}
+{#                    <input type="submit" name="submit" class="btn btn btn-primary btn-submit" value="Submit">#}
+{#                </div>#}
+{#            </form>#}
+{#            <!-- /page content -->#}
+{##}
+{#            </div>#}
+{#            <div class="modal-footer">#}
+{#                <button type="button" class="btn btn-default"#}
+{#                   data-dismiss="modal">close#}
+{#                </button>#}
+{#                <button type="button" id='modal_print' class="btn btn-primary">#}
+{#                  <i class="glyphicon glyphicon-print"></i> submit#}
+{#            	</button>#}
+{#            </div>#}
+{#          </div><!-- /.modal-content -->#}
+{#	 </div><!-- /.modal -->#}
+{#    </div>#}
+
+    <!-- 模态框（Modal） -->
+
+{#	<div class="modal fade" id="group-member-modal" tabindex="-1" role="dialog"#}
+{#   	    aria-labelledby="delModalLabel" aria-hidden="true">#}
+{##}
+{#   	<div class="modal-dialog" style="width:800px;height:400px">#}
+{#            <div class="modal-content">#}
+{#                <div class="modal-header">#}
+{#            	<button type="button" class="close"#}
+{#               	    data-dismiss="modal" aria-hidden="true">#}
+{#                    &times;#}
+{#            	</button>#}
+{#            	<h5 class="modal-title" >#}
+{#                      组成员#}
+{#            	</h5>#}
+{#            </div>#}
+{#            <div class="modal-body">#}
+{##}
+{#            <!-- page content -->#}
+{#            <form id="submit-form" name="contact-form" method="post">#}
+{##}
+{#                <div class="form-group">#}
+{#                    <textarea name="message" id="terminal_message"  class="form-control" rows="8" placeholder="Terminal Message" disabled></textarea>#}
+{#                </div>#}
+{##}
+{#            <div class="fixed-table-container" id="table_container" >#}
+{#                    <div class="fixed-table-header" >#}
+{#                          <table class="table table-hover  " id="user_group_member" >#}
+{##}
+{#                          </table>#}
+{#                    </div>#}
+{#            </div>#}
+{##}
+{#            </form>#}
+{#            <!-- /page content -->#}
+{##}
+{#            </div>#}
+{#            <div class="modal-footer">#}
+{#                <button type="button" class="btn btn-default"#}
+{#                   data-dismiss="modal">close#}
+{#                </button>#}
+{#                <button type="button" id='modal_print' class="btn btn-primary">#}
+{#                  <i class="glyphicon glyphicon-print"></i> submit#}
+{#            	</button>#}
+{#            </div>#}
+{#          </div><!-- /.modal-content -->#}
+{#	 </div><!-- /.modal -->#}
+
+{#    </div>#}
+
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+       <script>
+       //处理返回的url的参数
+       function GetRequest() {
+                var url = location.search; //获取url中"?"符后的字串
+                var theRequest = new Object();
+                if (url.indexOf("?") != -1) {
+                    var str = url.substr(1);
+                    strs = str.split("&");
+                    for (var i = 0; i < strs.length; i++) {
+                        theRequest[strs[i].split("=")[0]] = (strs[i].split("=")[1]);
+                    }
+                }
+                return theRequest;
+       }
+
+       var Request = new Object();
+       Request = GetRequest();
+
+
+
+
+        //组成员表格
+        function initTable() {
+           window.operateEvents = {
+               'click .remove-user': function (e, value, row, index) {
+                   var remove_user = row.User;
+
+                   $.confirm({
+                       title: '移除用户',
+                       content: '确定移除？',
+                       useBootstrap: true,
+                       buttons: {
+                           confirm: {
+                               text: '确定',
+                               action: function() {
+                                   $.ajax({
+                                       type: "post",
+                                       url: "/user_group_member",
+                                       async: false,
+                                       data: {
+                                           'group': Request["group"],
+                                           'remove_user': remove_user,
+                                       },
+                                       dataType: 'JSON',
+                                       success: function (data, status) {
+                                           if (status == "success") {
+                                               //$('#terminal_message').text(data["message"]) ;
+                                               //alert('remove');
+                                               //$('#user_group_member').bootstrapTable('refresh', {url: '/user_group_member_return_json'});
+                                           }
+                                       },
+                                       complete: function () {
+                                           //alert('remove');
+                                           $('#user_group_member').bootstrapTable('refresh', {url: '/user_group_member_return_json'});
+
+                                       }
+                                    });
+                               }
+                           },
+                           cancel: {
+                               text: '取消',
+                           },
+                       }
+                   });
+               },
+        }
+
+
+
+
+        $("#user_group_member").bootstrapTable({
+{#            method: "get",  //使用get请求到服务器获取数据#}
+            url: '/user_group_member_return_json',
+            striped: true,  //表格显示条纹
+            pagination: true, //启动分页
+            pageSize: 15,  //每页显示的记录数
+            pageNumber:1, //当前第几页
+            pageList: [5, 10, 15, 20, 25,50,100,150,200],  //记录数可选列表
+            search: true,  //是否启用查询
+            showColumns: true,  //显示下拉框勾选要显示的列
+            showRefresh: true,  //显示刷新按钮
+            singleSelect: true,
+            checkboxHeader:true,
+            detailFormatter:true,
+            checkboxHeader:true,
+            uniqueId:"Name",
+{#            toolbar: '#toolbar',#}
+            toolbarAlign:"left",
+            sidePagination: "client",
+            paginationVAlign:'top',
+            paginationHAlign:'right',
+            showExport:false,
+            exportDataType: 'all',
+{#            basic', 'all', 'selected'.#}
+            sortOrder: 'desc',
+            locale: "zh-CN",
+            columns: [{
+                field: 'state',
+                checkbox: false,
+            },{
+                field: 'User',
+                title: 'UserName',
+                align: 'left',
+            },{
+                field: 'operate',
+                title: 'operate',
+                align: 'left',
+                events: operateEvents,
+                formatter: operateFormatter
+            }],
+
+            queryParamsType : "undefined",
+            onEditableSave: function (field, row, oldValue, $el) {
+             }
+        });
+
+
+
+
+        function operateFormatter(value, row, index) {
+             //var name = getNameSelections();
+            return [
+            '<a class="remove-user" href="javascript:;"  data-gallery  title="移除用户" >',
+{#            '<i class="glyphicon glyphicon-remove"></i>',#}'移除',
+            '</a>',' ',
+
+            ].join('');
+        }
+     };
+
+
+
+        $(document).ready(function(){
+            //调用函数，初始化表格
+
+
+            initTable()
+
+
+
+        })
+
+
+
+        </script>
+
+{% endblock %}

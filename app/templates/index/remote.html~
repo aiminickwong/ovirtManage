@@ -1,0 +1,722 @@
+{% extends "base.html" %}
+{% block title %}Ovirt | 用户管理{% endblock %}
+
+{% block styles %}
+    {{ super() }}
+    <style>
+       .btn-submit{
+           margin-left:4px !important;
+        }
+
+	input[name='ipaddr_1'],
+	input[name='ipaddr_2'],
+	input[name='ipaddr_3']
+	{
+	   text-align:center;
+	   width:90px;
+ 	   display:inline;
+	}
+	input[name='submit']{
+	   height:34px;
+	   margin-left:50px;
+	   border-radius:5px;
+	}
+
+	.fixed-table-container .th-inner {
+	   font:13.5px/30px italic arial,sans-serif;
+	}
+	.modal-title{
+           text-align:center;
+	   margin-bottom:-5px;	 
+	}
+	.modal-body p{
+	   font:20px/30px;
+	   margin-top:0px;
+	   margin-bottom:5px;
+	}
+	.CLIENT_NAME{
+	   color:#3c8dbc;
+	}
+	.down_assets{
+	   text-decoration:underline;
+	}
+
+	.check_assets{
+	   cursor : pointer;
+	   margin-left:10px;
+	   text-decoration:underline;
+	}
+
+	#toolbar a{
+	   cursor:pointer;
+           margin-left:10px;
+           text-decoration:underline;
+	}
+
+    </style>
+{% endblock %}
+
+
+{% block sidebar %}
+  <!-- Left side column. contains the logo and sidebar -->
+  <aside class="main-sidebar">
+    <!-- sidebar: style can be found in sidebar.less -->
+    <section class="sidebar">
+      <!-- Sidebar user panel -->
+      <div class="user-panel">
+        <div class="pull-left image">
+          <!-- <img src="dist/img/user2-160x160.jpg" class="img-circle" alt="User Image"> --!>
+        </div>
+        <div class="pull-left info">
+<!--           <p>Alexander Pierce</p> -->
+        </div>
+      </div>
+
+      <ul class="sidebar-menu">
+        <li class="header">MAIN NAVIGATION</li>
+        <li class="treeview">
+          <a href="#">
+            <i class="fa fa-user"></i> <span>用户管理</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu">
+            <li class="active all-users"><a href= "{{ url_for('main.users') }}" ><i class="fa fa-circle-o"></i> 所有用户</a></li>
+{#            <li class="add-user"><a href= "javascript:void(0)" ><i class="fa fa-circle-o"></i> 新增用户</a></li>#}
+{#            <li class="set-pwd"><a href="#"><i class="fa fa-circle-o"></i> 设置密码与密码期限</a></li>#}
+{#            <li class="change-pwd"><a href="#"><i class="fa fa-circle-o"></i> 修改密码</a></li>#}
+          </ul>
+        </li>
+
+        <li class="treeview">
+          <a href="">
+            <i class="fa fa-group"></i> <span>用户组管理</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu">
+            <li><a href="{{ url_for('main.user_group') }}"><i class="fa fa-circle-o"></i> 所有用户组</a></li>
+{#            <li class="users-group"><a href= "javascript:void(0)" ><i class="fa fa-circle-o"></i> 新增用户组</a></li>#}
+
+          </ul>
+        </li>
+
+        <li class="treeview">
+          <a href="">
+            <i class="fa fa-cog"></i> <span>IP管理</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu">
+            <li><a href="{{ url_for('main.change_ip') }}"><i class="fa fa-circle-o"></i>修改IP地址</a></li>
+          </ul>
+        </li>
+
+        <li class="treeview">
+          <a href="">
+            <i class="fa fa-cloud-upload"></i> <span>文件上传</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu">
+            <li><a href="{{ url_for('main.iso_file') }}"><i class="fa fa-circle-o"></i> ISO文件上传</a></li>
+          </ul>
+        </li>
+
+        <li class="active treeview">
+          <a href="">
+            <i class="fa fa-laptop"></i> <span>资产管理</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu">
+            <li><a href="{{ url_for('main.remote') }}"><i class="fa fa-circle-o"></i>终端</a></li>
+          </ul>
+        </li>
+
+      </ul>
+    </section>
+    <!-- /.sidebar -->
+  </aside>
+
+
+
+{% endblock %}
+
+
+
+{% block content %}
+    <section class="content">
+      <!-- users list -->
+      <div class="row user_content">
+         <div class="col-md-12" >
+	     <div class='title-wrapper'>
+		<!-- <h4>终端管理</h4> -->
+	     </div>
+	     <div class="search-wrapper">
+                <form id="submit-form" name="contact-form" method="post">
+                    <div class="form-group">
+                       <p>搜索IP地址段:</p>
+		       <div class="ipaddr">
+                          <input type="text" name="ipaddr_1" class="form-control"required="required" placeholder="" autofocus="autofocus"/> -
+                          <input type="text" name="ipaddr_2" class="form-control"required="required" placeholder=""/> -
+                          <input type="text" name="ipaddr_3" class="form-control"required="required" placeholder=""/> - ***
+                          <input type="submit" name="submit" class="btn btn btn-primary btn-submit" value="搜索终端">
+		       </div>
+                    </div>
+               </form>
+            </div>
+
+
+            <div id="toolbar">
+                 <!--<a href="/static/assets.csv" title="导出所有资产详细信息" class="down_assets" download="资产信息">导出资产信息</a> -->
+                 <a title="查看所有资产信息" class="check_assets">查看所有资产信息</a>
+		 <a title="选择用户后加入到用户组" class="users_to_group">加入到用户分组</a>
+		 <a title="用户分组管理" class="group_manage">用户分组管理</a>
+
+
+
+	    </div>
+
+            <div class="fixed-table-container" id="table_container" >
+                     <div class="fixed-table-header" >
+                      <table class="table table-hover  " id="terminal_list" >
+                          <div id="toolbar">
+                          </div>
+
+                      </table>   
+                      </div>
+
+             </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" id="check-message-modal" tabindex="-1" role="dialog"
+   	    aria-labelledby="myModalLabel" aria-hidden="true">
+   	<div class="modal-dialog" style="width:700px;">
+            <div class="modal-content">
+                <div class="modal-header">
+            	<button type="button" class="close"
+               	    data-dismiss="modal" aria-hidden="true">
+                    &times;
+            	</button>
+            	<h5 class="modal-title" id="myModalLabel">
+                      终端信息
+            	</h5>
+            </div>
+            <div class="modal-body">
+
+            <!-- page content -->
+	    <p>CLIENT_NAME:<span class='CLIENT_NAME'></span></p>
+	    <p>CLIENT_MAC:<span class='CLIENT_MAC'></span></p>
+	    <p>CLIENT_IP:<span class='CLIENT_IP'></span></p>
+	   <!-- <p>CLIENT_VNCPWD:<span class='CLIENT_VNCPWD'></span></p>	
+	    <p>CLIENT_CFGPWD:<span class='CLIENT_CFGPWD'></span></p> -->
+	    <p>CLIENT_DFAPP:<span class='CLIENT_DFAPP'></span></p>
+	    <p>CLIENT_DFSRV:<span class='CLIENT_DFSRV'></span></p>
+	    <p>CLIENT_MEM:<span class='CLIENT_MEM'></span></p>
+	    <p>CLIENT_GPU:<span class='CLIENT_GPU'></span></p>
+	    <p>CLIENT_CPU:<span class='CLIENT_CPU'></span></p>
+	    <p>CLIENT_NIC:<span class='CLIENT_NIC'></span></p>
+	    <p>CLIENT_OS:<span class='CLIENT_OS'></span></p>
+	    <p>CLIENT_Model:<span class='CLIENT_Model'></span></p>
+	    <p>CLIENT_STORAGE:<span class='CLIENT_STORAGE'></span></p>
+	    <p>CLIENT_KERNEL:<span class='CLIENT_KERNEL'></span></p>
+	    <p>CLIENT_AUDIO:<span class='CLIENT_AUDIO'></span></p>
+	    <p>CLIENT_VERSION:<span class='CLIENT_VERSION'></span></p>
+	    <p>CLIENT_FREQ:<span class='CLIENT_FREQ'></span></p>
+	    <p>CLIENT_DISPLAY:<span class='CLIENT_DISPLAY'></span></p>
+	    <p>CLIENT_OPT:<span class='CLIENT_OPT'></span></p>
+	    <p>CLIENT_SESSION_0_TYPE:<span class='CLIENT_SESSION_0_TYPE'></span></p>
+	    <p>CLIENT_LANGUAGE:<span class='CLIENT_LANGUAGE'></span></p>
+
+            <!-- /page content -->
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default"
+                   data-dismiss="modal">关闭
+                </button>
+{#                <button type="button" id='modal_print' class="btn btn-primary">#}
+{#                  <i class="glyphicon glyphicon-print"></i> submit#}
+{#            	</button>#}
+            </div>
+          </div><!-- /.modal-content -->
+    </div>
+    <!-- 模态框（Modal） -->
+
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" id="check-all-assets-modal" tabindex="-1" role="dialog"
+            aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog all-asset-modal" >
+            <div class="modal-content">
+                <div class="modal-header">
+                <button type="button" class="close"
+                    data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h5 class="modal-title">
+                      所有资产信息
+                </h5>
+            </div>
+            <div class="modal-body">
+
+            <!-- page content -->
+
+            <div class="fixed-table-container" id="table_container" >
+                     <div class="fixed-table-header" >
+                      <table class="table table-hover  " id="all-assets-list" >
+                          <div id="toolbar">
+                          </div>
+
+                      </table>
+                      </div>
+
+             </div>
+
+
+            <!-- /page content -->
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default"
+                   data-dismiss="modal">关闭
+                </button>
+{#                <button type="button" id='modal_print' class="btn btn-primary">#}
+{#                  <i class="glyphicon glyphicon-print"></i> submit#}
+{#              </button>#}
+            </div>
+          </div><!-- /.modal-content -->
+         </div><!-- /.modal -->
+    </div>
+    <!-- 模态框（Modal） -->
+
+
+
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+       <script>
+
+      //所有资产
+      function all_assets_initTable() {
+
+        $("#all-assets-list").bootstrapTable({
+{#            method: "get",  //使用get请求到服务器获取数据#}
+            url: '/terminal/return_message',
+            striped: true,  //表格显示条纹
+            pagination: true, //启动分页
+            pageSize: 50,  //每页显示的记录数
+            pageNumber:1, //当前第几页
+            pageList: [5, 10, 15, 20, 25,50,100,150,200],  //记录数可选列表
+            search: true,  //是否启用查询
+            showColumns: false,  //显示下拉框勾选要显示的列
+            showRefresh: true,  //显示刷新按钮
+            singleSelect: false,
+            checkboxHeader:true,
+            detailFormatter:true,
+            checkboxHeader:true,
+            uniqueId:"CLIENT_MAC",
+            toolbar: '#toolbar',
+            toolbarAlign:"left",
+            sidePagination: "client",
+            paginationVAlign:'top',
+            paginationHAlign:'right',
+            showExport:true,
+            exportTypes:['excel','csv','json','xml'],
+            exportDataType:'all',
+            sortOrder: 'desc',
+            locale: "zh-CN",
+            exportOptions:{  
+               ignoreColumn: [(0,0),(0,4)],  //忽略某一列的索引  
+               fileName: '资产信息',  //文件名称设置  
+               worksheetName: 'sheet1',  //表格工作区名称  
+               tableName: '资产详细信息',  
+       },
+            columns: [{
+                field: 'CLIENT_NAME',
+                title: '用户',
+                align: 'left',
+            },{
+                field: 'CLIENT_MAC',
+                title: 'Mac地址',
+                align: 'left',
+            },{
+                field: 'CLIENT_IP',
+                title: 'ip地址',
+                align: 'left',
+            },{
+                field: 'CLIENT_DFAPP',
+                title: '连接类型',
+                align: 'left',
+            },{
+                field: 'CLIENT_DFSRV',
+                title: '连接地址',
+                align: 'left',
+            },{
+                field: 'CLIENT_MEM',
+                title: '内存容量',
+                align: 'left',
+            },{
+                field: 'CLIENT_GPU',
+                title: 'GPU',
+                align: 'left',
+            },{
+                field: 'CLIENT_NIC',
+                title: '网卡',
+                align: 'left',
+            },{
+                field: 'CLIENT_OS',
+                title: '操作系统',
+                align: 'left',
+            },{
+                field: 'CLIENT_Modal',
+                title: '客户机型号',
+                align: 'left',
+            },{
+                field: 'CLIENT_STORAGE',
+                title: '硬盘',
+                align: 'left',
+            },{
+                field: 'CLIENT_KERNEL',
+                title: '内核',
+                align: 'left',
+            },{
+                field: 'CLIENT_AUDIO',
+                title: '声卡',
+                align: 'left',
+            },{
+                field: 'CLIENT_VERSION',
+                title: '版本',
+                align: 'left',
+            },{
+                field: 'CLIENT_DISPLAY',
+                title: '分辨率',
+                align: 'left',
+            }],
+            queryParamsType : "undefined",
+            onEditableSave: function (field, row, oldValue, $el) {
+             }
+        });
+
+       }
+
+        function initTable() {
+           window.operateEvents = {
+	    'click .connect': function(e,value,row,index){
+	        var Name =  row.CLIENT_NAME;
+	        var vnc_pwd = row.CLIENT_VNCPWD;
+
+		var vnc_pwd_data  = {
+                     vnc_pwd_data:JSON.stringify({"pwd":vnc_pwd })
+                 }
+
+		$.ajax({
+                    type:'POST',
+                    url:'/server_ip',
+                    async: false,
+		    data:vnc_pwd_data,
+                    dataType:'json',
+		    //json:"callback",
+                    success:function(data){
+			//以http://开头可以重新定义访问地址
+			window.open('http://' + data['server_ip'] + ':6080/vnc_lite.html?path=websockify/?token=' + Name);
+                    },
+                    error:function(xhr,type){}
+                });
+
+	    },
+
+            'click .check': function (e, value, row, index) {
+		$('#check-message-modal').modal('toggle');	
+
+                var mac_data  = {
+                     mac_data:JSON.stringify({"mac":row.CLIENT_MAC})
+                 }
+
+                list = ['MAC','VNCPWD','CFGPWD','DFAPP','DFSRV',
+'MEM','GPU','CPU','NIC','OS','Model','STORAGE','KERNEL','IP','AUDIO','VERSION','NAME','FREQ','DISPLAY','OPT','SESSION_0_TYPE','LANGUAGE']
+
+
+                $.ajax({
+                    type:'POST',
+                    url:'/check_message',
+                    async: false,
+                    data:mac_data,
+                    dataType:'json',
+                    //json:"callback",
+                    success:function(data){
+			for(var i=0;i<list.length;i++){
+			    $('.CLIENT_' + list[i]).text(data["CLIENT_" + list[i] ]);
+			}
+
+                    },
+
+                    error:function(xhr,type){}
+                });
+
+            },
+
+            'click .unlock-user': function (e, value, row, index) {
+               var unlock_user = row.Name;
+
+               $.confirm({
+                    title: '解锁用户',
+                    content: '确定解锁' + row.Name + '?',
+                    useBootstrap: true,
+                    buttons: {
+                    confirm: {
+                        text: '确定',
+                        action:function () {
+                            $.ajax({
+                            type: "post",
+                            url: "/users",
+                            async: false,
+                            data:{
+                                'unlock_user':unlock_user,
+                            },
+                            dataType: 'JSON',
+                            success: function (data, status) {
+                                if (status == "success") {
+                                //$('#user_list').bootstrapTable('refresh', {url: '/users_return_json'});
+                                }
+                            },
+                            complete: function () {
+                            }
+                        });
+                        //$.alert('确认!');
+                        },
+                    },
+                    cancel: {
+                        text: '取消'
+                        //$.alert('取消!');
+                    },
+                    }
+                });
+              },
+        }
+
+        $("#terminal_list").bootstrapTable({
+{#            method: "get",  //使用get请求到服务器获取数据#}
+            url: '/terminal/return_message',
+            striped: true,  //表格显示条纹
+            pagination: true, //启动分页
+            pageSize: 50,  //每页显示的记录数
+            pageNumber:1, //当前第几页
+            pageList: [5, 10, 15, 20, 25,50,100,150,200],  //记录数可选列表
+            search: true,  //是否启用查询
+            showColumns: true,  //显示下拉框勾选要显示的列
+            showRefresh: true,  //显示刷新按钮
+            singleSelect: false,
+            checkboxHeader:true,
+            detailFormatter:true,
+            checkboxHeader:true,
+            uniqueId:"CLIENT_MAC",
+            toolbar: '#toolbar',
+            toolbarAlign:"left",
+            sidePagination: "client",
+            paginationVAlign:'top',
+            paginationHAlign:'right',
+            showExport:true,
+	    exportTypes:['excel','csv','json','xml'],
+            exportDataType:'all',
+            sortOrder: 'desc',
+            locale: "zh-CN",
+            exportOptions:{  
+               ignoreColumn: [(0,0),(0,4)],  //忽略某一列的索引  
+               fileName: '资产信息',  //文件名称设置  
+               worksheetName: 'sheet1',  //表格工作区名称  
+               tableName: '资产详细信息',  
+       },
+            columns: [{
+                field: 'state',
+                checkbox: true,
+
+            },{
+                field: 'CLIENT_NAME',
+                title: '用户',
+                align: 'left',
+		sortable: true,
+            },{
+                field: 'CLIENT_MAC',
+                title: 'Mac地址',
+                align: 'left',
+            },{
+                field: 'CLIENT_IP',
+                title: 'Ip地址',
+                align: 'left',
+		sortable: true,
+            },{
+		field: 'CLIENT_GROUP',
+		title: '用户组',
+		align: 'left',
+		sortable: true,
+	    },{
+                field: 'operate',
+                title: '操作',
+                align: 'left',
+                events: operateEvents,
+                formatter: operateFormatter
+            }],
+            queryParamsType : "undefined",
+            onEditableSave: function (field, row, oldValue, $el) {
+             }
+        });
+
+        function operateFormatter(value, row, index) {
+             //var name = getNameSelections();
+                return [
+            '<a class="connect" href="javascript:;" title="vnc连接终端机">','远程连接',' ',
+            '<a class="check" href="javascript:;" title="查看详细信息">','查看'
+            ].join('');
+           }
+        };
+
+        $(document).ready(function(){
+            //调用函数，初始化表格
+            initTable();
+            all_assets_initTable(); 
+	   
+	    var $table = $('#terminal_list');
+
+
+            function getNameSelections() {
+                return $.map($table.bootstrapTable('getSelections'), function (row) {
+                    return row.CLIENT_NAME
+               });
+            }
+
+	$('.check_assets').click(function () {
+            $('#check-all-assets-modal').modal('toggle');
+        })
+
+        var width=document.documentElement.clientWidth || document.body.clientWidth;
+        $('.all-asset-modal').width(width - 100);
+
+
+         $('.users_to_group').click(function () {
+	   //$('#group-manage-modal').modal('toggle');
+           $('#users-to-group-modal').modal('toggle');
+        });
+
+	 $('#users-to-group-submit-form').submit(function(e){
+            //e.preventDefault();
+
+            var users = getNameSelections();
+
+            var data = {
+                users_data:JSON.stringify({"data":$(this).serializeObject(),"select_users":users})                      
+           }
+
+           $.ajax({
+                type: "post",
+                url: "/remote",
+                async: false,
+                data:data,
+                dataType: 'JSON',
+                success: function (data, status) {
+                   if (status == "success"){
+                    }
+                },
+                complete: function () {
+                 }
+            });
+        });
+
+
+	$('.group_manage').click(function () {    
+           $('#group-manage-modal').modal('toggle');
+        });
+
+          $table.on('check.bs.table uncheck.bs.table ' +
+                'check-all.bs.table uncheck-all.bs.table', function () {
+	    //set remove a button
+            //$remove.prop('disabled', !$table.bootstrapTable('getSelections').length);
+
+	    // save your data, here just save the current page
+                var selections = getNameSelections();
+            // push or splice the selections if you want to save all data selections
+
+            });
+
+
+            //$remove.click(function () {
+
+	//	var data  = {
+          //          delete_users:JSON.stringify({"data":selections })
+            //     }
+
+               // $.ajax({
+                 //   type:'POST',
+                 //   url:'/users',
+                 //   async: false,
+                 //   data:data,
+                //    dataType:'json',
+                 //   success:function(data){
+	//		$('#user_list').bootstrapTable('refresh', {url: '/users_return_json'});
+	//	    },
+          //          error:function(xhr,type){}
+            //    });
+            //});
+
+        })
+
+        //表单信息构造 json结构
+        $.fn.serializeObject = function() {
+            var o = {};
+            var a = this.serializeArray();
+            $.each(a, function() {
+                if (o[this.name]) {
+                    if (!o[this.name].push) {
+                        o[this.name] = [o[this.name]];
+                    }
+                    o[this.name].push(this.value || '');
+                } else {
+                    o[this.name] = this.value || '';
+                }
+            });
+            return o;
+        };
+
+           $('#submit-form').submit(function(e){
+                 e.preventDefault();
+                 var data  = {
+                     data:JSON.stringify({"data":$(this).serializeObject() })
+                 }
+
+                 $.ajax({
+                     type:"POST",
+                     dataType:"json",
+                     url:'/remote',
+                     async: false,
+                     data:data,
+                     success: function (data, status) {
+                         if (status == "success") {
+                             //alert(data["message"]);
+                             //$('#terminal_message').text(data["message"]) ;
+                            // $('#terminal_list').bootstrapTable('refresh', {url: '/terminal/return_message'});
+                         }
+                     },
+                     complete: function () {
+			   $('#terminal_list').bootstrapTable('refresh', {url: '/terminal/return_message'});
+
+                     }
+                 });
+           });
+
+
+
+        </script>
+
+{% endblock %}

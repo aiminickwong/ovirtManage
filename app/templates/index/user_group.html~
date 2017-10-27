@@ -1,0 +1,511 @@
+{% extends "base.html" %}
+{% block title %}Ovirt | 用户组管理{% endblock %}
+
+{% block styles %}
+    {{ super() }}
+    <style>
+       .user_content{  
+            position: relative;
+            margin-top: 30px;
+            margin-left: -25px;
+       }
+
+       .remove-user{
+{#           color: #BD9662;#}
+       }
+
+       .modal-title{
+           text-align:center;
+       }
+       #terminal_message{
+           background: #26292e none repeat scroll 0 0;
+           color: #DFAE71;
+           border: medium none;
+           border-radius: 0;
+           box-shadow: none;
+           height: 300px;
+       }
+
+        .bootstrap-table{
+            border-top:  15px solid #3C8DBC ;
+        }
+
+        .select2-selection{
+            width: 769px;
+        }
+
+    </style>
+{% endblock %}
+
+
+{% block sidebar %}
+  <!-- Left side column. contains the logo and sidebar -->
+  <aside class="main-sidebar">
+    <!-- sidebar: style can be found in sidebar.less -->
+    <section class="sidebar">
+      <!-- Sidebar user panel -->
+      <div class="user-panel">
+        <div class="pull-left image">
+          <img src="dist/img/user2-160x160.jpg" class="img-circle" alt="User Image">
+        </div>
+        <div class="pull-left info">
+<!--           <p>Alexander Pierce</p> -->
+        </div>
+      </div>
+
+      <ul class="sidebar-menu">
+        <li class="header">MAIN NAVIGATION</li>
+        <li class="treeview">
+          <a href="#">
+            <i class="fa fa-user"></i> <span>用户管理</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu">
+            <li class="all-users"><a href= "{{ url_for('main.users') }}" ><i class="fa fa-circle-o"></i> 所有用户</a></li>
+{#            <li class="add-user"><a href= "javascript:void(0)" ><i class="fa fa-circle-o"></i> 新增用户</a></li>#}
+{#            <li class="set-pwd"><a href="#"><i class="fa fa-circle-o"></i> 设置密码与密码期限</a></li>#}
+{#            <li class="change-pwd"><a href="#"><i class="fa fa-circle-o"></i> 修改密码</a></li>#}
+          </ul>
+        </li>
+
+        <li class="active treeview">
+          <a href="">
+            <i class="fa fa-group"></i> <span>用户组管理</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu">
+            <li class="active"><a href="{{ url_for('main.user_group') }}"><i class="fa fa-circle-o"></i> 所有用户组</a></li>
+{#            <li class="add-user-group"><a href= "javascript:void(0)" ><i class="fa fa-circle-o"></i> 新增用户组</a></li>#}
+          </ul>
+        </li>
+
+        <li class="treeview">
+          <a href="">
+            <i class="fa fa-cog"></i> <span>IP管理</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu">
+            <li><a href="{{ url_for('main.change_ip') }}"><i class="fa fa-circle-o"></i>修改IP地址</a></li>
+          </ul>
+        </li>
+
+        <li class="treeview">
+          <a href="">
+            <i class="fa fa-cloud-upload"></i> <span>文件上传</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu">
+            <li><a href="{{ url_for('main.iso_file') }}"><i class="fa fa-circle-o"></i>  ISO文件上传</a></li>
+          </ul>
+        </li>
+
+        <li class="treeview">
+          <a href="">
+            <i class="fa fa-laptop"></i> <span>终端管理</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu">
+            <li><a href="{{ url_for('main.vnc') }}"><i class="fa fa-circle-o"></i>远程连接终端</a></li>
+          </ul>
+        </li>
+
+      </ul>
+    </section>
+    <!-- /.sidebar -->
+  </aside>
+
+{% endblock %}
+
+{% block content %}
+    <section class="content">
+      <!-- users list -->
+      <div class="row user_content">
+         <div class="col-md-12" >
+{#             <button id="remove" class="btn btn-danger" disabled>#}
+{#                 <i class="glyphicon glyphicon-remove"></i> 删除多个#}
+{#             </button>#}
+
+            <div class="fixed-table-container" id="table_container" >
+                    <div class="fixed-table-header" >
+                          <table class="table table-hover  " id="user_group_list" >
+                              <div id="toolbar">
+                                  <a  href="javascript:void(0);" class="add-user-group btn btn-primary " ><i class="glyphicon glyphicon-plus"></i>新建</a>
+                              </div>
+                          </table>
+                    </div>
+            </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 模态框（Modal） -->
+	<div class="modal fade" id="add-user-group-modal" tabindex="-1" role="dialog"
+   	    aria-labelledby="myModalLabel" aria-hidden="true">
+   	<div class="modal-dialog" style="width:500px;">
+            <div class="modal-content">
+                <div class="modal-header">
+            	<button type="button" class="close"
+               	    data-dismiss="modal" aria-hidden="true">
+                    &times;
+            	</button>
+            	<h5 class="modal-title" id="myModalLabel">
+                      新建用户组
+            	</h5>
+            </div>
+            <div class="modal-body">
+
+            <!-- page content -->
+            <form id="submit-form" name="contact-form" method="post">
+                <div class="form-group">
+                    <input type="text" name="group" class="form-control" required="required" placeholder="用户组" autofocus="autofocus">
+                </div>
+                <div class="form-group">
+                    <input type="text" name="description" class="form-control" required="required" placeholder="描述" autofocus="autofocus">
+                </div>
+                <div class="form-group">
+                    <textarea name="message" id="terminal_message"  class="form-control" rows="8" placeholder="Terminal Message" disabled></textarea>
+                </div>
+                <div class="form-group">
+                    <input type="submit" name="submit" class="btn btn btn-primary btn-submit" value="Submit">
+                </div>
+            </form>
+            <!-- /page content -->
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default"
+                   data-dismiss="modal">close
+                </button>
+{#                <button type="button" id='modal_print' class="btn btn-primary">#}
+{#                  <i class="glyphicon glyphicon-print"></i> submit#}
+{#            	</button>#}
+            </div>
+          </div><!-- /.modal-content -->
+	 </div><!-- /.modal -->
+    </div>
+
+    <!-- 模态框（Modal） -->
+
+	<div class="modal fade" id="add-user-to-group-modal"  role="dialog"
+   	    aria-labelledby="delModalLabel" aria-hidden="true">
+
+   	<div class="modal-dialog" style="width:800px;height:400px">
+            <div class="modal-content">
+                <div class="modal-header">
+            	<button type="button" class="close"
+               	    data-dismiss="modal" aria-hidden="true">
+                    &times;
+            	</button>
+            	<h5 class="modal-title" >
+                      用户加入到用户组
+            	</h5>
+            </div>
+            <div class="modal-body">
+
+            <!-- page content -->
+            <form id="add-to-group-submit-form" name="contact-form" method="post">
+                <div class="form-group">
+                    <input type="text" name="group" class="form-control" required="required" placeholder="group" readonly>
+                </div>
+                <div class="form-group">
+                    <select  multiple="multiple" id='user_list' class="form-control" >
+                        <option> </option>
+                    </select>
+                </div>
+{#                <div class="form-group">#}
+{#                    <input type="text" name="user" class="form-control" required="required" placeholder="user" autofocus="autofocus">#}
+{#                </div>#}
+
+                <div class="form-group">
+                    <textarea name="message" id="add_to_group_terminal_message"  class="form-control" rows="8" placeholder="Terminal Message" disabled></textarea>
+                </div>
+                <div class="form-group">
+                    <input type="submit" name="submit" class="btn btn btn-primary btn-submit" value="Submit">
+                </div>
+            </form>
+            <!-- /page content -->
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default"
+                   data-dismiss="modal">close
+                </button>
+{#                <button type="button" id='modal_print' class="btn btn-primary">#}
+{#                  <i class="glyphicon glyphicon-print"></i> submit#}
+{#            	</button>#}
+            </div>
+          </div><!-- /.modal-content -->
+	 </div><!-- /.modal -->
+
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+       <script>
+        function initTable() {
+           window.operateEvents = {
+            'click .del-usergroup': function (e, value, row, index) {
+               var del_user_group = row.Name;
+
+               $.confirm({
+                    title: '删除用户组',
+                    content: '确定删除？',
+                    useBootstrap: true,
+                    buttons: {
+                    confirm: function () {
+                      $.ajax({
+                        type: "post",
+                        url: "/user_group",
+                        async: false,
+                        data:{
+                            'del_user_group':del_user_group,
+                        },
+                        dataType: 'JSON',
+                        success: function (data, status) {
+                            if (status == "success") {
+                                //$('#terminal_message').text(data["message"]) ;
+                                //alert('del');
+                                $('#user_group_list').bootstrapTable('refresh', {url: '/user_group_return_json'});
+                            }
+                        },
+                        complete: function () {
+                        }
+                    });
+                        //$.alert('确认!');
+                    },
+                    cancel: function () {
+                        //$.alert('取消!');
+                    },
+                    }
+                });
+               },
+
+            'click .check-user': function (e, value, row, index) {
+                $.ajax({
+                    type: "post",
+                    url: "/user_group_member_return_json",
+                    async: false,
+                    data:{
+                        'find_group':row.Name,
+                    },
+                    dataType: 'JSON',
+                    success: function (data, status) {
+                        if (status == "success") {
+                            //$('#user_list').bootstrapTable('refresh', {url: '/users_return_json'});
+                            //window.location.href = "{{ url_for('main.user_group_member') }}" + "?group=" + $.trim(row.Name)
+                            window.open("{{ url_for('main.user_group_member') }}" + "?group=" + $.trim(row.Name))
+                        }
+                    },
+                    complete: function () {
+                    }
+                });
+            },
+
+            'click .add-user': function (e, value, row, index) {
+                $('#add-user-to-group-modal').modal('toggle');
+                $("input[name='group']").val(row.Name);
+
+                var data  = {
+                     query_group:JSON.stringify({"data":row.Name })
+                 }
+
+                 $.ajax({
+                    type: "post",
+                    url: "/user_load_return_json",
+                    async: false,
+                    data:data,
+                    dataType: 'JSON',
+                    success: function (data, status) {
+                        if (status == "success") {
+			            if (data['errmessage'] != undefined){
+				            alert(data['errmessage']);
+			            }
+		 	
+                        $("#user_list").select2({
+                            data:data,
+                            placeholder: "输入用户可搜索",
+                            width: "100%",
+                        }); 
+                        }
+                    },
+                    complete: function () {
+                    }
+                });
+            },
+           }
+
+        $("#user_group_list").bootstrapTable({
+{#            method: "get",  //使用get请求到服务器获取数据#}
+            url: '/user_group_return_json',
+            striped: true,  //表格显示条纹
+            pagination: true, //启动分页
+            pageSize: 50,  //每页显示的记录数
+            pageNumber:1, //当前第几页
+            pageList: [5, 10, 15, 20, 25,50,100,150,200],  //记录数可选列表
+            search: true,  //是否启用查询
+            showColumns: true,  //显示下拉框勾选要显示的列
+            showRefresh: true,  //显示刷新按钮
+            singleSelect: true,
+            checkboxHeader:true,
+            detailFormatter:true,
+            checkboxHeader:true,
+            uniqueId:"Name",
+            toolbar: '#toolbar',
+            toolbarAlign:"left",
+            sidePagination: "client",
+            paginationVAlign:'top',
+            paginationHAlign:'right',
+            showExport:false,
+            exportDataType: 'all',
+{#            basic', 'all', 'selected'.#}
+            sortOrder: 'desc',
+            locale: "zh-CN",
+            columns: [{
+                field: 'state',
+                checkbox: false,
+            },{
+                field: 'Name',
+                title: 'Name',
+                align: 'left',
+            },{
+                field: 'DisplayName',
+                title: 'Display Name',
+                align: 'left',
+            },{
+                field: 'Description',
+                title: 'Description',
+                align: 'left',
+            },{
+                field: 'operate',
+                title: 'operate',
+                align: 'left',
+                events: operateEvents,
+                formatter: operateFormatter
+            }],
+            queryParamsType : "undefined",
+            onEditableSave: function (field, row, oldValue, $el) {
+             }
+        });
+
+        function operateFormatter(value, row, index) {
+             //var name = getNameSelections();
+                return [
+            '<a class="del-usergroup" href="javascript:;"  data-gallery  title="删除用户组" >',
+{#            '<i class="glyphicon glyphicon-remove"></i>',#}'删除',
+            '</a>',' ',
+            '<a class="check-user" href="javascript:;"  data-gallery  title="查看用户" >',
+{#            '<i class="glyphicon glyphicon-remove"></i>',#}'查看用户',
+            '</a>',' ',
+            '<a class="add-user" href="javascript:;" title="把用户加入到用户组">',
+{#            '<i class="glyphicon glyphicon-remove"></i>',#}'加入用户',
+            ' ',
+            '</a>',' ',
+            ].join('');
+           }
+        };
+
+        $(document).ready(function(){
+            //调用函数，初始化表格
+            initTable();
+            $('.add-user-group').click(function(){
+                $('#add-user-group-modal').modal('toggle');
+
+                $('#add-user-group-modal').on('hide.bs.modal', function () {
+                    window.location.href = "{{ url_for('main.user_group') }}"
+                });
+            });
+        })
+
+        //表单信息构造 json结构
+        $.fn.serializeObject = function() {
+            var o = {};
+            var a = this.serializeArray();
+            $.each(a, function() {
+                if (o[this.name]) {
+                    if (!o[this.name].push) {
+                        o[this.name] = [o[this.name]];
+                    }
+                    o[this.name].push(this.value || '');
+                } else {
+                    o[this.name] = this.value || '';
+                }
+            });
+            return o;
+        };
+
+           $('#submit-form').submit(function(e){
+                 e.preventDefault();
+
+
+                 var data  = {
+                     data:JSON.stringify({"data":$(this).serializeObject() })
+                 }
+
+                 $.ajax({
+                     type:"POST",
+                     dataType:"json",
+                     url:'/user_group',
+                     async: false,
+                     data:data,
+                     success: function (data, status) {
+                         if (status == "success") {
+                             //alert(data["message"]);
+                             $('#terminal_message').text(data["message"]) ;
+
+                             //$('#user_group_list').bootstrapTable('refresh', {url: '/user_group_return_json'});
+                         }
+                     },
+                     complete: function () {
+                     }
+                 });
+           });
+
+
+           $('#add-to-group-submit-form').submit(function(e){
+                 e.preventDefault();
+                 var select_users = $('#user_list').select2('data')[0].text;
+
+	            ret_select = []
+		        var selected = $("#user_list").select2('data');//选择的值
+		        for (var i=0;i<selected.length;i++) {
+    			    //alert(selected[i].id + '->' + selected[i].text);//输出 2->jiesi-1
+			        ret_select.push(selected[i].text)
+		        }
+
+                 var add_to_group_data  = {
+                     add_to_group_data:JSON.stringify({"data":$(this).serializeObject(),"select_users":ret_select})
+                 }
+
+                 $.ajax({
+                     type:"POST",
+                     dataType:"json",
+                     url:'/user_group',
+                     async: false,
+                     data:add_to_group_data,
+                     success: function (data, status) {
+                         if (status == "success") {
+                             $('#add_to_group_terminal_message').text(data["message"]) ;
+               		     $('#add-user-to-group-modal').on('hide.bs.modal', function () {
+                                 window.location.href = "{{ url_for('main.user_group') }}"
+                             });
+                         }
+                     },
+                     complete: function () {
+                     }
+                 });
+           });
+        </script>
+
+{% endblock %}
