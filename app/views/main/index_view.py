@@ -21,6 +21,7 @@ import re
 import MySQLdb
 from  multiprocessing import Pool
 import binascii
+import shutil
 
 reload(sys)
 sys.setdefaultencoding('utf8')
@@ -432,7 +433,7 @@ def load_machines():
 
 
 
-ALLOWED_EXTENSIONS = set(['iso','txt'])
+ALLOWED_EXTENSIONS = set(['iso','txt','sql'])
 IGNORED_FILES = set(['.gitignore'])
 
 
@@ -1078,7 +1079,40 @@ def remote():
                 except:
                     db.rollback()
 
+        backup = request.form.get('backup','')
 
+	print(backup)
+	if backup == "backup":
+	    os.popen("mysqldump -uroot  -p'%s' ovirt_development assets groupmanage > %s/app/static/data/sql/assets.sql"%("uroot012",os.getcwd()))	
+
+	print('上传资信息')
+
+	file = request.files['file']
+        if file:
+	    print(file.filename)
+            filename = secure_filename(file.filename)
+	    filename = gen_file_name(filename)
+	    print('filename:')
+	    print(filename)
+            mimetype = file.content_type
+	
+	    if not allowed_file(file.filename):
+
+                result = uploadfile(name=filename, type=mimetype, size=0, not_allowed_msg="不支持的文件类型")
+            	print("文件类型不支持")
+	    else:
+		uploaded_file_path = os.path.join("%s/app/static/data/uploadsql"%os.getcwd(), filename)
+		print(uploaded_file_path)
+		os.popen("rm -rf %s/app/static/data/uploadsql/*"%os.getcwd())
+		
+		file.save(uploaded_file_path)
+		print('save')
+		
+		files = os.listdir("%s/app/static/data/uploadsql"%os.getcwd())
+		print(files)
+		os.popen("mysql -uroot  -p'%s' ovirt_development < %s/app/static/data/uploadsql/%s"%("uroot012",os.getcwd(),files[0]))
+	
+		
     return render_template('index/remote.html')
 
 import csv

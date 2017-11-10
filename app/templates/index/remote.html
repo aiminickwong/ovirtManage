@@ -208,13 +208,13 @@
             <div id="toolbar">
                  <!--<a href="/static/assets.csv" title="导出所有资产详细信息" class="down_assets" download="资产信息">导出资产信息</a> -->
                  <a title="查看所有资产信息" class="check_assets">查看所有资产信息</a>
+		 <a title="备份所有资产信息" href="/static/data/sql/assets.sql" class="backup_assets" download="assets.sql">备份所有资产</a>
+	  	 <a title="导入已备份的所有资产" class="import_assets">导入资产</a>
+	
 		 <a title="需要先在分组管理中建立分组,选择用户后加入到用户组" style='display:'  class="users_to_group">加入分组</a>
 		 <a title="用户分组管理" class="group_manage">分组管理</a>
 		 <a title="远程开启瘦客户机" class="awakes_machine">唤醒瘦客户机</a>
 		 <a title="删除瘦客户机" class="delete_users">删除瘦客户机</a>
-
-
-
 	    </div>
 
             <div class="fixed-table-container" id="table_container" >
@@ -539,9 +539,55 @@
 
 
 
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" id="upload-assets-modal" tabindex="-1" role="dialog"
+            aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog upload-assets" >
+            <div class="modal-content">
+                <div class="modal-header">
+                <button type="button" class="close"
+                    data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h5 class="modal-title">
+                     导入资产
+                </h5>
+            </div>
+            <div class="modal-body">
+
+            <!-- page content -->
+	  
+           <form id="assetsUpload" action="/remote" enctype="multipart/form-data" name="assetsupload-form" method="post">
+	      <div class="form-group">
+                  <input type="file"  name="file" value="选择文件">
+	      </div>
+              <div class="form-group">
+                  <input type="submit" name="submit" class="btn btn btn-primary btn-submit" value="提交">
+              </div>
+            </form>
+
+            <!-- /page content -->
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default"
+                   data-dismiss="modal">关闭
+                </button>
+{#                <button type="button" id='modal_print' class="btn btn-primary">#}
+{#                  <i class="glyphicon glyphicon-print"></i> submit#}
+{#              </button>#}
+            </div>
+          </div><!-- /.modal-content -->
+         </div><!-- /.modal -->
+    </div>
+  </div>
+  <!-- 模态框（Modal） -->
+
+
 
 
 </div>
+
 
 {% endblock %}
 
@@ -551,7 +597,6 @@
 
       //所有资产
       function all_assets_initTable() {
-
         $("#all-assets-list").bootstrapTable({
 {#            method: "get",  //使用get请求到服务器获取数据#}
             url: '/terminal/return_message',
@@ -574,7 +619,7 @@
             paginationVAlign:'top',
             paginationHAlign:'right',
             showExport:true,
-            exportTypes:['excel','csv','json','xml'],
+            exportTypes:['excel','csv','json','xml','sql'],
             exportDataType:'all',
             sortOrder: 'desc',
             locale: "zh-CN",
@@ -582,7 +627,7 @@
                ignoreColumn: [(0,0),(0,4)],  //忽略某一列的索引
                fileName: '资产信息',  //文件名称设置
                worksheetName: 'sheet1',  //表格工作区名称
-               tableName: '资产详细信息',
+               tableName: 'assets',
        },
             columns: [{
                 field: 'CLIENT_NAME',
@@ -644,12 +689,15 @@
                 field: 'CLIENT_DISPLAY',
                 title: '分辨率',
                 align: 'left',
+            },{
+                field: 'CLIENT_GROUP',
+                title: '分组',
+                align: 'left',
             }],
             queryParamsType : "undefined",
             onEditableSave: function (field, row, oldValue, $el) {
              }
         });
-
        }
 
         function initTable() {
@@ -658,7 +706,7 @@
 	            var Name =  row.CLIENT_NAME;
 	            var vnc_pwd = row.CLIENT_VNCPWD;
 
-		          var vnc_pwd_data  = {
+		    var vnc_pwd_data  = {
                      vnc_pwd_data:JSON.stringify({"pwd":vnc_pwd })
                  }
 
@@ -763,7 +811,7 @@
             sidePagination: "client",
             paginationVAlign:'top',
             paginationHAlign:'right',
-            showExport:true,
+            showExport:false,
 	          exportTypes:['excel','csv','json','xml'],
             exportDataType:'all',
             sortOrder: 'desc',
@@ -772,7 +820,7 @@
                ignoreColumn: [(0,0),(0,4)],  //忽略某一列的索引
                fileName: '资产信息',  //文件名称设置
                worksheetName: 'sheet1',  //表格工作区名称
-               tableName: '资产详细信息',
+               tableName: 'assets',
             },
             columns: [{
                 field: 'state',
@@ -845,7 +893,7 @@
               paginationVAlign:'top',
               paginationHAlign:'right',
               showExport:true,
-              exportTypes:['excel','csv','json','xml'],
+              exportTypes:['excel','csv','json','xml','sql'],
               exportDataType:'all',
               sortOrder: 'desc',
               locale: "zh-CN",
@@ -853,7 +901,7 @@
                  ignoreColumn: [(0,0),(0,4)],  //忽略某一列的索引
                  fileName: '资产信息',  //文件名称设置
                  worksheetName: 'sheet1',  //表格工作区名称
-                 tableName: '资产详细信息',
+                 tableName: 'groupmanage',
          },
               columns: [{
                 field: 'state',
@@ -923,10 +971,37 @@
               $('#check-all-assets-modal').modal('toggle');
             })
 
+
             var width=document.documentElement.clientWidth || document.body.clientWidth;
             $('.all-asset-modal').width(width - 100);
 	    $('.group-manage').width(width - 200);
 	
+
+	   $('.backup_assets').click(function () {
+                $.ajax({
+                    type: "post",
+                    url: "/remote",
+                    async: false,
+                    data:{
+			backup:"backup"
+		    }, 	
+                    dataType: 'JSON',
+                    success: function (data, status) {
+                        if (status == "success") {
+
+                        };
+                    },
+                    complete: function () {
+                    }
+                });
+            })
+ 
+
+           $('.import_assets').click(function () {
+        	$('#upload-assets-modal').modal('toggle');	       	
+	
+             
+            })
 
            $('.users_to_group').click(function () {
 
