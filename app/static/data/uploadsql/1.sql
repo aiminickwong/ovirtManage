@@ -80,7 +80,7 @@ CREATE TABLE `groupmanage` (
 
 LOCK TABLES `groupmanage` WRITE;
 /*!40000 ALTER TABLE `groupmanage` DISABLE KEYS */;
-INSERT INTO `groupmanage` VALUES ('class1','班级一一一'),('class2','班级二');
+INSERT INTO `groupmanage` VALUES ('class1','班级一'),('class2','班级二');
 /*!40000 ALTER TABLE `groupmanage` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -93,4 +93,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-11-10 11:25:21
+-- Dump completed on 2017-11-10 11:25:24

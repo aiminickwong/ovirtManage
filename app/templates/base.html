@@ -44,6 +44,16 @@
 
     {%- endblock styles %}
 
+    <style>
+	.close-system a{
+    	    cursor:pointer;
+	}
+
+        .reboot-system a{
+    	    cursor:pointer;
+	}
+   </style>
+
   {%- endblock head %}
   </head>
 
@@ -71,6 +81,9 @@
           <li class="dropdown messages-menu">
  
           </li>
+
+	  <li class="close-system"><a title="关闭服务器">关闭</a></li>
+	  <li class="reboot-system"><a title="重启服务器">重启</a></li>
 
           <!-- User Account: style can be found in dropdown.less -->
           <li class="dropdown user user-menu">
@@ -150,17 +163,95 @@
     <script src="/static/dist/js/jquery-confirm/3.2.0/jquery-confirm.min.js"></script>
     <script src="/static/select2-4.0.3/dist/js/select2.min.js"></script>
 
-
-
     <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 {#    <script src="/static/dist/js/pages/dashboard.js"></script>#}
     <!-- AdminLTE for demo purposes -->
 {#    <script src="/static/dist/js/demo.js"></script>#}
-    <script>
+  
+  <script>
+    $(document).ready(function(){
+    	$('.close-system').click(function () {
+	        $.confirm({
+                    title: '关闭服务器',
+                    content: '确定关闭服务器?',
+                    useBootstrap: true,
+                    buttons: {
+                    confirm: {
+                        text: '确定',
+                        action:function () {
+                          var data = {
+                              system_shutdown:JSON.stringify({"is-shutdown":"shutdown"})
+                          }
+
+                          $.ajax({
+                            type: "post",
+                            url: "/system",
+                            async: false,
+                            data:data,
+                            dataType: 'JSON',
+                            success: function (data, status) {
+                               if (status == "success"){
+                               }
+                            },
+                            complete: function () {
+                            }
+                          });
+                        },
+                    },
+                    cancel: {
+                        text: '取消'
+                    },
+                    }
+                });
+	})
+
+        $('.reboot-system').click(function () {
+                $.confirm({
+                    title: '重启服务器',
+                    content: '确定重启服务器?',
+                    useBootstrap: true,
+                    buttons: {
+                    confirm: {
+                        text: '确定',
+                        action:function () {
+                          var data = {
+                              system_reboot:JSON.stringify({"is-reboot":"reboot"})
+                          }
+
+                          $.ajax({
+                            type: "post",
+                            url: "/system",
+                            async: false,
+                            data:data,
+                            dataType: 'JSON',
+                            success: function (data, status) {
+                               if (status == "success"){
+                               }
+                            },
+                            complete: function () {
+                            }
+                          });
+                        },
+                    },
+                    cancel: {
+                        text: '取消'
+                    },
+                    }
+                });
+        })
+
+
+
+
+
+    })
+  </script>
+
+ {%- endblock scripts %}
+
+
 
     </script>
-
-    {%- endblock scripts %}
 
 
 </div>

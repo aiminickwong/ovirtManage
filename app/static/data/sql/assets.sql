@@ -56,7 +56,7 @@ CREATE TABLE `assets` (
 
 LOCK TABLES `assets` WRITE;
 /*!40000 ALTER TABLE `assets` DISABLE KEYS */;
-INSERT INTO `assets` VALUES ('00301854C83D','12345678','','freerdp','172.16.128.11',' 1955632K',' Intel(R) HD Graphics',' Intel(R) Celeron(R) CPU  J1900  @ 1.99GHz',' Realtek Semiconductor Co., Ltd. RTL8111/8168B PCI Express Gigabit Ethernet controller (rev 07)',' Thinsys Linux',' Enterprise Edition','Disk /dev/sda: 8012 MB','Linux 3.14.13','172.16.128.65','  Intel Corporation Device 0f04 (rev 0e)','2012111580','TC004','DDRIII 1600Mhz init freq','1920x1080','sse2, sse3, ssse3, sse4.1, sse4.2','freerdp','zh_CN.utf8','class2');
+INSERT INTO `assets` VALUES ('003018564B08','12345678','','rdesktop','172.16.128.8',' 1955744K',' Intel(R) HD Graphics',' Intel(R) Celeron(R) CPU  J1900  @ 1.99GHz',' Realtek Semiconductor Co., Ltd. RTL8111/8168B PCI Express Gigabit Ethernet controller (rev 07)',' Thinsys Linux',' Enterprise Edition','Disk /dev/sda: 8012 MB','Linux 3.14.13','172.16.128.65','  Intel Corporation Device 0f04 (rev 0e)','2012111580','TC002','DDRIII 1600Mhz init freq','1920x1080','sse2, sse3, ssse3, sse4.1, sse4.2','rdesktop','zh_CN.utf8','class2'),('003018564B09','12345678','','freerdp','172.16.128.11',' 1955628K',' Intel(R) HD Graphics',' Intel(R) Celeron(R) CPU  J1900  @ 1.99GHz',' Realtek Semiconductor Co., Ltd. RTL8111/8168B PCI Express Gigabit Ethernet controller (rev 07)',' Thinsys Linux',' Enterprise Edition','Disk /dev/sda: 8012 MB','Linux 3.14.13','172.16.128.64','  Intel Corporation Device 0f04 (rev 0e)','2012111580','TC001','DDRIII 1600Mhz init freq','1366x768','sse2, sse3, ssse3, sse4.1, sse4.2','freerdp','zh_CN.utf8','class1');
 /*!40000 ALTER TABLE `assets` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -93,4 +93,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-11-10 17:40:10
+-- Dump completed on 2018-01-10 10:44:27

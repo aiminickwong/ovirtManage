@@ -27,6 +27,41 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 
 
+
+
+@main.route('/system',methods=['GET','POST'])
+@login_required
+def system():
+    if request.method == 'POST':
+	data_shutdown = request.form.get('system_shutdown', '')
+        #any判断一个对象是否为空的方法
+        if  any(data_shutdown):
+            try:
+                is_shutdown=json.loads(data_shutdown)["is-shutdown"]
+		print(is_shutdown)
+                if is_shutdown =='shutdown':
+                    message = commands.getstatusoutput('shutdown -h now')
+		    print(message)
+                return simplejson.dumps({"message": message})
+            except:
+                print 'None'
+
+        data_reboot = request.form.get('system_reboot', '')
+        #any判断一个对象是否为空的方法
+        if  any(data_reboot):
+            try:
+                is_reboot=json.loads(data_reboot)["is-reboot"]
+		print('is---reboot?')
+		print(is_reboot)
+                if is_reboot =='reboot':
+                    message = commands.getstatusoutput('reboot')
+	
+                return simplejson.dumps({"message": message})
+            except:
+                print 'None'
+
+
+
 @main.route('/users',methods=['GET','POST'])
 @login_required
 def users():
@@ -468,7 +503,7 @@ def iso_upload():
     if request.method == 'POST':
         print 'upload iso'
         file = request.files['file']
-        if file:
+        if fet-pwdle:
             filename = secure_filename(file.filename)
             filename = gen_file_name(filename)
             mimetype = file.content_type
@@ -722,10 +757,12 @@ def ret_server_ip():
 def remote():
 
     if request.method == 'POST':
-
         db = MySQLdb.connect('localhost','root','uroot012','ovirt_development',charset='utf8')
-        cursor = db.cursor()
+        cursor = db.cursor()      
 
+
+
+	#若不存在，生成资产表
         create_assets_sql = """CREATE TABLE IF NOT EXISTS `assets` (
   	    	`CLIENT_MAC` VARCHAR(255),
  	    	`CLIENT_VNCPWD` VARCHAR(255),
@@ -755,7 +792,6 @@ def remote():
         create_group_sql = """CREATE TABLE IF NOT EXISTS `groupmanage` (
   	    	`GROUP_NAME` VARCHAR(255),
  	    	`GROUP_REMARK` VARCHAR(255),
-
   	   	 PRIMARY KEY(`GROUP_NAME`)
 	     )ENGINE=InnoDB DEFAULT CHARSET=utf8;"""
 
@@ -767,7 +803,8 @@ def remote():
             print('生成数据表出错')
             db.rollback()
 
-        re_data = request.form.get('data', '')
+	#搜索终端ip
+	re_data = request.form.get('data', '')
         if any(re_data):
             try:
                 form_data = json.loads(re_data)["data"]
@@ -864,8 +901,6 @@ def remote():
                 except:
                     db.rollback()
 
-                # db.close()
-
             def write_vnc_tokens():
 	        print('写入vnc_tokens')
                 sql = "select CLIENT_NAME,CLIENT_IP from assets"
@@ -881,7 +916,6 @@ def remote():
 	        except:
 	            db.rollback()
 
- 	        db.close()
 
             def search_file():
                 filenames = os.listdir('/var/lib/tftpboot/')
@@ -893,15 +927,11 @@ def remote():
             search_file()
 	    print('搜索完成')
 	    write_vnc_tokens()
-            #return redirect(url_for('remote'))i
 
-	#加入到用户组
+	#加入到分组
 	add_to_group_users = request.form.get('users_data', '')
 
 	if any(add_to_group_users):
-
-	    db = MySQLdb.connect('localhost','root','uroot012','ovirt_development',charset='utf8')
-            cursor = db.cursor()
 
 	    groupName =  json.loads(add_to_group_users)["selected_group"]
 	    select_users = json.loads(add_to_group_users)["select_users"]
@@ -909,20 +939,23 @@ def remote():
 	    print(groupName)
 	    print(select_users)
             for i in select_users:
-		try:
-		    cursor.execute("UPDATE assets SET CLIENT_GROUP='%s' WHERE CLIENT_NAME='%s' "%(groupName,i))
-	     	    db.commit()
-		except:
+	        try:
+	            cursor.execute("UPDATE assets SET CLIENT_GROUP='%s' WHERE CLIENT_NAME='%s' "%(groupName,i))
+	            db.commit()
+	        except Exception, e:
+		    print('错误')
+		    print(e)
+
 		    db.rollback()
+
+	        print('加入成功')
+
 
 	#删除瘦客户机
 	del_users = request.form.get('del_users', '')
 
 
         if any(del_users):
-
-            db = MySQLdb.connect('localhost','root','uroot012','ovirt_development',charset='utf8')
-            cursor = db.cursor()
 
 	    users = json.loads(del_users)["del_users"]
 
@@ -939,13 +972,14 @@ def remote():
 	    mac = json.loads(del_users)["select_mac"]
 	    print('mac')
 	    print(mac)
-	    for i in mac:
-		print(i)
-	        os.remove('/var/lib/tftpboot/%s'%i)	
+	    try:
+	        for i in mac:
+		    print(i)
+	            os.remove('/var/lib/tftpboot/%s'%i)
+	    except Exception,e:
+	        print('文件已删除')
 
-
-
-        #唤醒瘦客户机
+	#唤醒瘦客户机
         awakeMac = request.form.get('awakesMacData', '')
 
 
@@ -970,7 +1004,7 @@ def remote():
 	    s.close()
 
 
-        #分组管理：添加分组
+	#分组管理：添加分组
         add = request.form.get('addGroupData', '')
 
 	print(add)
@@ -980,8 +1014,6 @@ def remote():
             remarks = json.loads(add)["add-group-data"]['remarks']
 	    print(groupName)
 	    print(remarks)
-            #db = MySQLdb.connect('localhost','root','uroot012','ovirt_development',charset='utf8')
-            #cursor = db.cursor()
 
 	    try:
 	        print('insert')
@@ -1057,9 +1089,6 @@ def remote():
 
             group = json.loads(awakeGroup)["awakeGroup"]
 
-	    db = MySQLdb.connect('localhost','root','uroot012','ovirt_development',charset='utf8')
-            cursor = db.cursor()
-
 	    for i in group:
 		print(i)
                 try:
@@ -1078,41 +1107,77 @@ def remote():
 
                 except:
                     db.rollback()
+	
+	#备份资产信息
+	backup = request.form.get('backup','')
 
-        backup = request.form.get('backup','')
-
-	print(backup)
 	if backup == "backup":
 	    os.popen("mysqldump -uroot  -p'%s' ovirt_development assets groupmanage > %s/app/static/data/sql/assets.sql"%("uroot012",os.getcwd()))	
 
-	print('上传资信息')
 
-	file = request.files['file']
-        if file:
-	    print(file.filename)
-            filename = secure_filename(file.filename)
-	    filename = gen_file_name(filename)
-	    print('filename:')
-	    print(filename)
-            mimetype = file.content_type
-	
-	    if not allowed_file(file.filename):
 
-                result = uploadfile(name=filename, type=mimetype, size=0, not_allowed_msg="不支持的文件类型")
-            	print("文件类型不支持")
-	    else:
-		uploaded_file_path = os.path.join("%s/app/static/data/uploadsql"%os.getcwd(), filename)
-		print(uploaded_file_path)
-		os.popen("rm -rf %s/app/static/data/uploadsql/*"%os.getcwd())
-		
-		file.save(uploaded_file_path)
-		print('save')
-		
-		files = os.listdir("%s/app/static/data/uploadsql"%os.getcwd())
-		print(files)
-		os.popen("mysql -uroot  -p'%s' ovirt_development < %s/app/static/data/uploadsql/%s"%("uroot012",os.getcwd(),files[0]))
+	# !!!!!!!!  这里出了400问题！！# !!!!!!!!
 	
-		
+	#file = request.values.get("form_data")
+	try:
+	    file=request.files['assetfile']
+	    #file = request.form.get('FormData','')
+	    print('wenjian')
+	    print(file)
+
+            if file:
+                print('上传资产信息')
+	        print(file)
+                print(file.filename)
+                filename = secure_filename(file.filename)
+                filename = gen_file_name(filename)
+                print('filename:')
+                print(filename)
+                mimetype = file.content_type
+
+                if not allowed_file(file.filename):
+
+                    result = uploadfile(name=filename, type=mimetype, size=0, not_allowed_msg="不支持的文件类型")
+                    print("文件类型不支持")
+                else:
+                    uploaded_file_path = os.path.join("%s/app/static/data/uploadsql"%os.getcwd(), filename)
+                    print(uploaded_file_path)
+                    os.popen("rm -rf %s/app/static/data/uploadsql/*"%os.getcwd())
+                    file.save(uploaded_file_path)
+                    print('save')
+
+                    files = os.listdir("%s/app/static/data/uploadsql"%os.getcwd())
+                    print(files)
+                    os.popen("mysql -uroot  -p'%s' ovirt_development < %s/app/static/data/uploadsql/%s"%("uroot012",os.getcwd(),files[0]))
+
+        except Exception,e:
+	    print(e)
+	    print('没文件')
+  
+
+
+
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        db.close()
+			
     return render_template('index/remote.html')
 
 import csv
