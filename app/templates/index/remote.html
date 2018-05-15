@@ -1,8 +1,12 @@
 {% extends "base.html" %}
-{% block title %}Ovirt | 用户管理{% endblock %}
+{% block title %}Ovirt | 资产管理{% endblock %}
 
 {% block styles %}
     {{ super() }}
+    <style>
+	<link href="/static/bootstrap/css/bootstrap-twitter.min.css" rel="stylesheet">
+    </style>
+
     <style>
        .btn-submit{
            margin-left:4px !important;
@@ -42,31 +46,42 @@
 	}
 
 	.check_assets{
+	   font:black;
 	   cursor : pointer;
-	   margin-left:10px;
 	   text-decoration:underline;
 	}
 
+	#toolbar{
+	    margin-left:500px;
+	}
+
+        #toolbar li{
+            margin-right:15px;
+        }
+
 	#toolbar a{
 	   cursor:pointer;
-           margin-left:10px;
            text-decoration:underline;
 	}
 
-	#group_toolbar a{
+	#group_toolbar  a{
     	   cursor:pointer;
-           margin-left:10px;
+           margin-right:10px;
            text-decoration:underline;
   	}
 
+        #configs_toolbar a{
+           cursor:pointer;
+           margin-right:10px;
+           text-decoration:underline;
+        }
+
 
 	.delete_users{
-	   margin-left:10px !important;
-	   color:#FD5F17;
+	   color:black;
 	}
 
-	.del_group{
-    	   margin-left:10px !important;
+	.del_group,.del_config{
            color:#FD5F17;
         }
 
@@ -75,14 +90,29 @@
 	}
 
 	.awakes_machine{
-	   margin-left:180px !important;
 	   color:#407A0F;
 	}
 
-        .awakes_group{
-           margin-left:180px !important;
+        .awakes_group,
+	.shutdown_group{
            color:#407A0F;
         }
+        #commandmenu{
+	   list-style:none;
+	   display:inline-block;
+	}
+        #assetsmenu{
+           list-style:none;
+           display:inline-block;
+        }
+        #groupsmenu{
+           list-style:none;
+           display:inline-block;
+        }
+	#configsmenu{
+           list-style:none;
+           display:inline-block;
+	}
 
 
     </style>
@@ -176,11 +206,7 @@
     <!-- /.sidebar -->
   </aside>
 
-
-
 {% endblock %}
-
-
 
 {% block content %}
     <section class="content">
@@ -207,14 +233,43 @@
 
             <div id="toolbar">
                  <!--<a href="/static/assets.csv" title="导出所有资产详细信息" class="down_assets" download="资产信息">导出资产信息</a> -->
-                 <a title="查看所有资产信息" class="check_assets">查看所有资产信息</a>
-		 <a title="备份所有资产信息" href="/static/data/sql/assets.sql" class="backup_assets" download="assets.sql">备份所有资产</a>
-	  	 <a title="导入已备份的所有资产" class="import_assets">导入资产</a>
-	
-		 <a title="需要先在分组管理中建立分组,选择用户后加入到用户组" style='display:'  class="users_to_group">加入分组</a>
-		 <a title="用户分组管理" class="group_manage">分组管理</a>
-		 <a title="远程开启瘦客户机" class="awakes_machine">唤醒瘦客户机</a>
-		 <a title="删除瘦客户机" class="delete_users">删除瘦客户机</a>
+
+                    <li class="dropdown" id="assetsmenu">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">资产<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+			    <li><a title="查看所有资产信息" class="check_assets">查看所有资产信息</a></li>
+                            <li><a title="备份所有资产信息" href="/static/data/sql/assets.sql" class="backup_assets" download="assets.sql">备份所有资产</a></li>
+		   	    <li><a title="导入已备份的所有资产" class="import_assets">导入资产</a></li>
+		        </ul>
+                    </li>
+
+		    <li class="dropdown" id="groupsmenu">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">分组<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+			    <li><a title="selectGroup分组管理中建立分组,选择用户后加入到用户组" style='display:'  class="users_to_group">加入分组</a></li>
+                            <li><a title="选择用户后移出用户组" style='display:'  class="users_remove_group">移出分组</a></li>
+                            <li><a title="用户分组管理" class="group_manage">分组管理</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="dropdown" id="commandmenu">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">瘦客户机<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a title="远程开启瘦客户机" class="awakes_machine">唤醒</a></li>
+		            <li><a title="重启瘦客户机" class="reboot_machine">重启</a></li> 
+			    <li><a title="关闭瘦客户机" class="shutdown_machine">关闭</a></li>
+                            <li><a title="删除瘦客户机" class="delete_users">删除</a></li>
+                            <li><a title="上传瘦客户机配置文件" class="upconfig">上传配置文件</a></li>
+			    <li><a title="分发瘦客户机配置文件" class="downconfig">分发配置文件</a></li>
+                        </ul>
+                    </li>
+                    <li class="dropdown" id="configsmenu">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">配置文件<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a title="管理配置文件" class="configs_manage">管理</a></li>
+                        </ul>
+                    </li>
+
 	    </div>
 
             <div class="fixed-table-container" id="table_container" >
@@ -225,8 +280,7 @@
 
                       </table>
                       </div>
-
-             </div>
+           </div>
         </div>
       </div>
     </section>
@@ -285,7 +339,7 @@
           </div><!-- /.modal-content -->
     </div>
   </div>
-
+</div>
     <!-- 模态框（Modal） -->
 
     <!-- 模态框（Modal） -->
@@ -409,7 +463,9 @@
                <a title="添加一个新的分组" class="add_group">添加分组</a>
 	       <a title="更改分组信息" class="update_group_name">更改分组信息</a>	
 	       <a title="唤醒该分组的所有瘦客户机" class="awakes_group">唤醒分组</a>
-
+	       <a title="唤醒该分组的所有瘦客户机" class="reboot_group">重启分组</a>
+	       <a title="关闭该分组的所有瘦客户机" class="shutdown_group">关闭分组</a>
+	       <a title="为该分组的所有瘦客户机分发配置文件" class="downconfig_group">分发配置</a>
                <a title="删除存在的分组" style='display:'  class="del_group">删除分组</a>
           </div>
 
@@ -508,8 +564,7 @@
 	  
            <form id="update-group-submit-form" name="contact-form" method="post">
               <div class="form-group">
-                 <input type="text" name="groupName" class="form-control" required="required" placeholder="输入分
-组名称">
+                 <input type="text" name="groupName" id="groupName" class="form-control" readonly="true" required="required">
               </div>
               <div class="form-group">
                  <textarea name="remarks" class="form-control" rows="3" placeholder="对该分组的描述"></textarea>
@@ -537,9 +592,7 @@
   </div>
   <!-- 模态框（Modal） -->
 
-
-
-    <!-- 模态框（Modal） -->
+<!-- 模态框（Modal） -->
     <div class="modal fade" id="upload-assets-modal" tabindex="-1" role="dialog"
             aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog upload-assets" >
@@ -567,6 +620,93 @@
             </form>
 
             <!-- /page content -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default"
+                   data-dismiss="modal">关闭
+                </button>
+            </div>
+          </div><!-- /.modal-content -->
+         </div><!-- /.modal -->
+    </div>
+  </div>
+  <!-- 模态框（Modal） -->
+
+
+    <!-- 模态框（Modal）--> 
+    <div class="modal fade" id="config-modal" tabindex="-1" role="dialog"
+            aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width:1000px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                <button type="button" class="close"
+                    data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h5 class="modal-title">
+                     填写上传配置文件备注
+                </h5>
+            </div>
+            <div class="modal-body">
+                <!-- page content -->
+
+	            <div class="fixed-table-container" id="table_container" >
+			<div id="configs_toolbar">
+                           <a title="删除配置文件" class="del_config">删除</a>
+		           <a title="导出配置文件" class="backup_profiles">导出配置</a>
+                          <a title="导入配置文件"  class="import_profiles">导入配置</a>
+			</div>
+                        <div class="fixed-table-header" >
+                            <table class="table table-hover" id="configs-list" >
+                                <div id="configs_toolbar">
+                                </div>
+                           </table>
+                       </div>
+                    </div>
+	  
+          <!-- /page content -->
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default"
+                   data-dismiss="modal">关闭
+                </button>
+            </div>
+          </div><!-- /.modal-content -->
+         </div><!-- /.modal -->
+    </div>
+  </div>
+  <!-- 模态框（Modal） -->
+
+
+  <!-- 模态框（Modal） 导入配置文件--> 
+    <div class="modal fade" id="import-profiles-modal" tabindex="-1" role="dialog"
+            aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog import-profiles" >
+            <div class="modal-content">
+                <div class="modal-header">
+                <button type="button" class="close"
+                    data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h5 class="modal-title">
+                     导入配置文件
+                </h5>
+            </div>
+            <div class="modal-body">
+
+            <!-- page content -->
+	  
+           <form id="profilesImport" action="/remote" enctype="multipart/form-data" name="profilesImport-form" method="post">
+	      <div class="form-group">
+                  <input type="file"  name="profile" value="选择配置文件">
+	      </div>
+              <div class="form-group">
+                  <input type="submit" name="submit" class="btn btn btn-primary btn-submit" value="提交">
+              </div>
+            </form>
+
+            <!-- /page content -->
 
             </div>
             <div class="modal-footer">
@@ -586,14 +726,175 @@
 
 
 
-</div>
+    <!-- 模态框（Modal）mark:分发配置 -->
+    <div class="modal fade" id="downconfig-modal" tabindex="-1" role="dialog"
+            aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width:800px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                <button type="button" class="close"
+                    data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h5 class="modal-title">
+                     分发配置文件
+                </h5>
+            </div>
+            <div class="modal-body">
+                <!-- page content -->
+		  <form id="down-config-submit-form" name="contact-form" method="post">
+                      <p>选择要分发的配置文件</p>
+                      <div class="form-group">
+                          <select  multiple="multiple" name="groups" id='down_config_list' class="form-control" >
+                              <option> </option>
+                          </select>
+                      </div>
+
+                      <div class="form-group">
+                          <input type="submit" name="submit" class="btn btn btn-primary btn-submit" value="提交">
+                      </div>
+                  </form>
+                <!-- /page content -->
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default"
+                   data-dismiss="modal">关闭
+                </button>
+            </div>
+          </div><!-- /.modal-content -->
+         </div><!-- /.modal -->
+    </div>
+  </div>
+
+
+
+    <!-- 模态框（Modal）mark:按组分发配置 -->
+    <div class="modal fade" id="downconfig-group-modal" tabindex="-1" role="dialog"
+            aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width:800px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                <button type="button" class="close"
+                    data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h5 class="modal-title">
+                    为组分发配置文件
+                </h5>
+            </div>
+            <div class="modal-body">
+                <!-- page content -->
+                  <form id="down-config-group-submit-form" name="contact-form" method="post">
+                      <p>选择要分发的配置文件</p>
+                      <div class="form-group">
+                          <select  multiple="multiple" name="groups" id='down_config_group_list' class="form-control" >
+                              <option> </option>
+                          </select>
+                      </div>
+
+                      <div class="form-group">
+                          <input type="submit" name="submit" class="btn btn btn-primary btn-submit" value="提交">
+                      </div>
+
+                  </form>
+                <!-- /page content -->
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default"
+                   data-dismiss="modal">关闭
+                </button>
+            </div>
+          </div><!-- /.modal-content -->
+         </div><!-- /.modal -->
+    </div>
+  </div>
+
+
 
 
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
-       <script>
+      <script>
+      //配置文件 mark111
+      function config_initTable() {
+        $("#configs-list").bootstrapTable({
+            url: '/remote/return_configs',
+            striped: true,  //表格显示条纹
+            pagination: true, //启动分页
+            pageSize: 50,  //每页显示的记录数
+            pageNumber:1, //当前第几页
+            pageList: [5, 10, 15, 20, 25,50,100,150,200],  //记录数可选列表
+            search: true,  //是否启用查询
+            showColumns: false,  //显示下拉框勾选要显示的列
+            showRefresh: true,  //显示刷新按钮
+            singleSelect: false,
+            checkboxHeader:true,
+            detailFormatter:true,
+            checkboxHeader:true,
+            uniqueId:"CLIENT_MAC",
+            toolbar: '#configs_toolbar', // 这里需要设置好 不能与其它表的冲突
+            toolbarAlign:"left",
+            sidePagination: "client",
+	    paginationVAlign:'top',
+            paginationHAlign:'right',
+            showExport:true,
+            exportTypes:['excel','csv','json','xml','sql'],
+            exportDataType:'all',
+            sortOrder: 'desc',
+            locale: "zh-CN",
+            exportOptions:{
+               ignoreColumn: [],  //忽略某一列的索引
+               fileName: '',  //文件名称设置
+               worksheetName: '',  //表格工作区名称
+               tableName: '',
+            },
+            columns: [{
+                field: 'state',
+                checkbox: true,
+            },{
+                field: 'CONFIG_NAME',
+                title: '文件名',
+                align: 'left',
+            },{
+                field: 'CONFIG_REMARK',
+                title: '备注',
+                align: 'left',
+	 	editable: {
+                    type: 'text',
+                    title: '配置文件备注',
+	            emptytext:'---',
+                 },
+            }],
+            queryParamsType : "undefined",
+            onEditableSave: function (field, row, oldValue, $el) {
+		$.ajax({
+                    type: "post",
+                    url: "/remote",
+                    data: {
+                        'config_row':row,
+                        'config_oldValue':oldValue,
+                    },
+                    dataType: 'JSON',
+                    success: function (data, status) {
+                        if (status == "success") {
+                            //alert('提交数据成功');
+                        }
+                    },
+{#                    error: function () {#}
+{#                        alert('编辑失败');#}
+{#                    },#}
+                    complete: function () {
+
+                    }
+                });
+
+            }
+        });
+       }
 
       //所有资产
       function all_assets_initTable() {
@@ -719,6 +1020,7 @@
 		                 //json:"callback",
                     success:function(data){
 			              //以http://开头可以重新定义访问地址
+				        // alert('http://' + data['server_ip'] + ':6080/vnc_lite.html?path=websockify/?token=' + Name);
 			                window.open('http://' + data['server_ip'] + ':6080/vnc_lite.html?path=websockify/?token=' + Name);
                     },
                     error:function(xhr,type){}
@@ -727,7 +1029,7 @@
 	    },
 
             'click .check': function (e, value, row, index) {
-		            $('#check-message-modal').modal('toggle');
+	 	$('#check-message-modal').modal('toggle');
 
                 var mac_data  = {
                      mac_data:JSON.stringify({"mac":row.CLIENT_MAC})
@@ -839,13 +1141,18 @@
                 field: 'CLIENT_IP',
                 title: 'Ip地址',
                 align: 'left',
-		            sortable: true,
+		sortable: true,
             },{
-		            field: 'CLIENT_GROUP',
-		            title: '分组',
-		            align: 'left',
-		            sortable: true,
-	          },{
+		field: 'CLIENT_GROUP',
+		title: '分组',
+		align: 'left',
+		sortable: true,
+	   },{
+		field: 'CLIENT_STATUS',
+                title: '状态',
+	        align: 'left',
+	        sortable: true,
+           },{
                 field: 'operate',
                 title: '操作',
                 align: 'left',
@@ -951,7 +1258,9 @@
             initTable();
             all_assets_initTable();
             client_group_initTable();
+	    config_initTable();
 
+	    // 终端列表
 	    var $table = $('#terminal_list');
 
             function getNameSelections() {
@@ -966,6 +1275,14 @@
                     return row.CLIENT_MAC
                });
             }
+
+            function getIpSelections() {
+                return $.map($table.bootstrapTable('getSelections'), function (row) {
+                    return row.CLIENT_IP
+               });
+            }
+
+	    // 配置文件列表
 
 	    $('.check_assets').click(function () {
               $('#check-all-assets-modal').modal('toggle');
@@ -995,13 +1312,17 @@
                     }
                 });
             })
- 
-
+	   
+	   // 导入资产 
            $('.import_assets').click(function () {
-        	$('#upload-assets-modal').modal('toggle');	       	
-	
-             
-            })
+        	$('#upload-assets-modal').modal('toggle');	       	    
+           })
+
+	   // 导入配置
+	   $('.import_profiles').click(function() {
+	        $('#import-profiles-modal').modal('toggle');
+	   })
+
 
            $('.users_to_group').click(function () {
 
@@ -1014,7 +1335,7 @@
 
 		      }
 
-	        $.ajax({
+	         $.ajax({
                     type: "post",
                     url: "/group_load_return_json",
                     async: false,
@@ -1032,18 +1353,42 @@
                     },
                     complete: function () {
                     }
-                });
-	   }
-    });
+                 });
+	        }
+             });
 
+           $('.users_remove_group').click(function () {
 
-	 //here!
+                 var users = getNameSelections();
+                 if(users == ""){
+                     alert('请先选择瘦客户机');
+                 }else{
+                     var data = {
+			remove_users_from_group_data:JSON.stringify({"selected_users":users})
+                     }
+
+                     $.ajax({
+                        type: "post",
+                        url: "/remote",
+                        async: false,
+                        data:data,
+                        dataType: 'JSON',
+                        success: function (data, status) {
+                            if (status == "success") {
+                            }
+                        },
+                        complete: function () {
+		           $table.bootstrapTable('refresh', {url:'/terminal/return_message'});
+                        }
+                     });
+                }
+          });
+
 	 $('#users-to-group-submit-form').submit(function(e){
             //e.preventDefault();
 
             var users = getNameSelections();
 	    var selected_group = $("#group_list").select2('data')[0].text;//选择的值
-
 
             var data = {
                 users_data:JSON.stringify({"selected_group":selected_group,"select_users":users})
@@ -1108,7 +1453,7 @@
                       	         }
                    	     },
                    	     complete: function () {
-                      	        $table.bootstrapTable('refresh', {url:'/terminal/return_message'});
+                      	         $table.bootstrapTable('refresh', {url:'/terminal/return_message'});
                    	     }
                           });
                         },
@@ -1174,6 +1519,14 @@
                      }
                  });
            });
+	
+	   // 自动扫描终端机
+	   function auto_scan(){
+	       $('#terminal_list').bootstrapTable('refresh', {url: '/terminal/return_message'});
+	   }
+
+	   // time = setInterval("auto_scan()", 5000);
+
 
 
 	   //分组管理
@@ -1184,15 +1537,36 @@
                });
            }
 
-	   $('.update_group_name').click(function(){
-	       var selectGroup = getGroupSelections();
+           function getProSelections() {
+                return $.map($('#configs-list').bootstrapTable('getSelections'), function (row) {
+                    return row.CONFIG_NAME
+               });
+           }
+
+	  $('.backup_profiles').click(function(){
+	      pro_name = getProSelections()
+	      if(pro_name == ""){
+		alert('请先选择一个配置文件');
+	      }else if(pro_name.length > 1){
+                   alert('只能选择一个配置文件');
+              }else{
+	          $(".backup_profiles").attr("href","/static/data/profiles/" + pro_name);
+	          $(".backup_profiles").attr("download", pro_name);
+	      }	 
+          })
 	
+	  $('.update_group_name').click(function(){
+	       var selectGroup = getGroupSelections();
+		
 	       if(selectGroup == ''){
 	      	  alert('请先选择一个分组');
 	        }else if(selectGroup.length > 1){
 		   alert('只能选择一个分组');
 	   	}else{
+	           // $('#GroupName').val("selectGroup");
+		   // input[name='GroupName'].val(selectGroup);
 		   $('#update-group-name-modal').modal('toggle');
+		   $('#groupName').val(selectGroup);
 		}
 	   });
 
@@ -1203,7 +1577,6 @@
   	   //添加分组 提交
 	   $('#add-group-submit-form').submit(function(e){
               e.preventDefault();
-
 
               var data = {
 	         addGroupData:JSON.stringify({"add-group-data":$(this).serializeObject()})
@@ -1220,7 +1593,8 @@
                     }
                 },
                 complete: function () {
-		   $('#client-group-list').bootstrapTable('refresh', {url: '/client_group/return_message'});                           $('#add-group-modal').modal('hide'); 
+		  // $('#client-group-list').bootstrapTable('refresh', {url: '/client_group/return_message'});                          //$('#add-group-modal').modal('hide'); 
+		  window.location.href = "{{ url_for('main.remote') }}";
    	        }
             });
         });
@@ -1309,6 +1683,11 @@
                });
         }
 
+        function getName() {
+              return $.map($('#terminal_list').bootstrapTable('getSelections'), function (row) {
+                   return row.CLIENT_NAME
+               });
+        }
 
 	//唤醒瘦客户机
 	$('.awakes_machine').click(function(){
@@ -1336,6 +1715,221 @@
                });
 	   }
 	});
+
+        //重启瘦客户机
+        $('.reboot_machine').click(function(){
+           var reboot_ip = getIp();
+	   var reboot_name = getName();
+           if(reboot_ip == ""){
+               alert('请先选择瘦客户机');
+           }else{
+               var data = {
+                   rebootIpData:JSON.stringify({"rebootIp":reboot_ip})
+               }
+               $.ajax({
+                  type: "post",
+                  url: "/remote",
+                  async: false,
+                  data:data,
+                  dataType: 'JSON',
+                  success: function (data, status) {
+                     if (status == "success"){
+                     }
+                  },
+                  complete: function () {
+                    alert('重启:' + reboot_name);
+                  }
+               });
+           }
+        });
+
+
+
+        //关闭瘦客户机
+        $('.shutdown_machine').click(function(){
+           var ip = getIp();
+	   var name = getName();
+
+           if(ip == ""){
+               alert('请先选择瘦客户机');
+           }else{
+               var data = {
+                   shutdownIpData:JSON.stringify({"shutdownIp":ip})
+               }
+               $.ajax({
+                  type: "post",
+                  url: "/remote",
+                  async: false,
+                  data:data,
+                  dataType: 'JSON',
+                  success: function (data, status) {
+                     if (status == "success"){
+                     }
+                  },
+                  complete: function () {
+                    alert('关闭:' + name );
+                  }
+               });
+           }
+        });
+
+
+
+        //上传瘦客户机配置
+        $('.upconfig').click(function(){
+           var ip = getIp();
+
+           if(ip == ""){
+               alert('请先选择瘦客户机');
+           }else if(ip.length < 2){
+               var data = {
+                   uploadIpData:JSON.stringify({"uploadIp":ip})
+               }
+               $.ajax({
+                  type: "post",
+                  url: "/remote",
+                  async: false,
+                  data:data,
+                  dataType: 'JSON',
+                  success: function (data, status) {
+                     if (status == "success"){
+	                 if(data["upconfig_result"] == "succeed"){
+                            alert("上传成功",data["upconfig_result"]);
+			    // go here
+		      	    $('#config-modal').modal('toggle');
+			    $('#configs-list').bootstrapTable('refresh', {url: '/remote/return_configs'});
+                         }else{
+			    alert("上传失败")
+			 }
+     		     }
+		
+                  },
+                  complete: function () {
+                  }
+               });
+           }else{
+		alert('只能选择单台客户机');
+	   }
+
+        });
+
+	// 配置文件管理 
+	$('.configs_manage').click(function(){
+	    $('#config-modal').modal('toggle');
+	    $('#configs-list').bootstrapTable('refresh', {url: '/remote/return_configs'});
+	})
+
+	// 删除配置文件
+	function getConfigName() {
+              return $.map($('#configs-list').bootstrapTable('getSelections'), function (row) {
+                   return row.CONFIG_NAME
+               });
+        }
+
+	$('.del_config').click(function(){
+	    var config_name = getConfigName();
+	    if(config_name == ''){
+	  	alert('请先选择配置文件');
+	    }else{
+	        $.confirm({
+		    title: '删除配置文件',
+                    content: '确定删除?',
+                    useBootstrap: true,
+                    buttons: {
+                    confirm: {
+			text: '确定',
+			action:function () {
+			    var data = {
+               			 delConfigData:JSON.stringify({"delConfig":config_name})
+           		    }
+			    $.ajax({
+                 	        type: "post",
+                  		url: "/remote",
+                  		async: false,
+                  		data:data,
+                  		dataType: 'JSON',
+                  		success: function (data, status) {
+                     		    if (status == "success"){
+                     		    }    
+                  		},
+                  		complete: function () {
+				    window.location.href = "{{ url_for('main.remote') }}"; 
+				   // $('#configs-list').bootstrapTable('refresh', {url: '/remote/return_configs'});
+                  		}
+            		    });
+			},
+		    },
+		    cancel: {
+			text: '取消'
+		    },
+		    }
+		});
+	    }
+	})
+
+        //分发瘦客户机配置
+        $('.downconfig').click(function(){
+           var ip = getIp();
+
+           if(ip == ""){
+               alert('请先选择瘦客户机');
+           }else{
+	       $('#downconfig-modal').modal('toggle');
+               var data = {}
+	       $.ajax({
+                    type: "post",
+                    url: "/configs_load_return_json",
+                    async: false,
+                    data:data,
+                    dataType: 'JSON',
+                    success: function (data, status) {
+                        if (status == "success") {
+                            $("#down_config_list").select2({
+                                data:data,
+                                placeholder: "选择配置文件",
+                                width: "100%",
+                                maximumSelectionLength: 1
+                            });
+                        }
+                    },
+                    complete: function () {
+                    }
+                 });
+	   }
+        });
+
+	 // 提交分发配置表单
+
+	 function getConfigIp() {
+              return $.map($('#terminal_list').bootstrapTable('getSelections'), function (row) {
+                   return row.CLIENT_IP
+               });
+         }
+         $('#down-config-submit-form').submit(function(e){
+	    e.preventDefault();
+        
+ 	    var selected_config = $("#down_config_list").select2('data')[0].text;//选择的值
+	    var selected_ip = getConfigIp();
+            var data = {
+                sub_config_data:JSON.stringify({"submit_config":selected_config,"submit_ip":selected_ip})
+            }
+
+
+           $.ajax({
+                type: "post",
+                url: "/remote",
+                async: false,
+                data:data,
+                dataType: 'JSON',
+                success: function (data, status) {
+                   if (status == "success"){
+                   }
+                },
+                complete: function () {
+		    $('#downconfig-modal').modal('hide');
+                }
+            });
+        });
 
 
 
@@ -1373,9 +1967,128 @@
            }
         });
 
+        //唤醒分组
+        $('.reboot_group').click(function(){
+           var selectGroup = getGroupSelections();
+
+           if(selectGroup == ""){
+               alert('请先选择分组');
+           }else{
+               var data = {
+                   rebootGroupData:JSON.stringify({"rebootGroup":selectGroup})
+               }
+               $.ajax({
+                  type: "post",
+                  url: "/remote",
+                  async: false,
+                  data:data,
+                  dataType: 'JSON',
+                  success: function (data, status) {
+                     if (status == "success"){
+                     }
+                  },
+                  complete: function () {
+                    alert('重启:' + selectGroup );
+                  }
+               });
+           }
+        });
 
 
+        //关闭分组
+        $('.shutdown_group').click(function(){
+           var selectGroup = getGroupSelections();
+
+           if(selectGroup == ""){
+               alert('请先选择分组');
+           }else{
+               var data = {
+                   shutdownGroupData:JSON.stringify({"shutdownGroup":selectGroup})
+               }
+               $.ajax({
+                  type: "post",
+                  url: "/remote",
+                  async: false,
+                  data:data,
+                  dataType: 'JSON',
+                  success: function (data, status) {
+                     if (status == "success"){
+                     }
+                  },
+                  complete: function () {
+                    alert('关闭:' + selectGroup );
+                  }
+               });
+           }
+        });
+
+
+        //为组分发配置
+        $('.downconfig_group').click(function(){
+           var selectGroup = getGroupSelections();
+
+           if(selectGroup == ""){
+               alert('请先选择分组');
+           }else{
+	       $('#downconfig-group-modal').modal('toggle');
+	       var data = {}
+               $.ajax({
+                    type: "post",
+                    url: "/configs_load_return_json",
+                    async: false,
+                    data:data,
+                    dataType: 'JSON',
+                    success: function (data, status) {
+                        if (status == "success") {
+                            $("#down_config_group_list").select2({
+                                data:data,
+                                placeholder: "选择配置文件",
+                                width: "100%",
+                                maximumSelectionLength: 1
+                            });
+                        }
+                    },
+                    complete: function () {
+                    }
+                 });
+           }
+        });
+
+         // 提交按组分发配置表单 go!
+
+         function getConfigGroup() {
+              return $.map($('#client-group-list').bootstrapTable('getSelections'), function (row) {
+                   return row.GROUP_NAME
+               });
+         }
+         $('#down-config-group-submit-form').submit(function(e){
+            e.preventDefault();
+        
+            var selected_group_config = $("#down_config_group_list").select2('data')[0].text;//选择的值
+            var selected_group = getConfigGroup();
+            var data = {
+                sub_config_group_data:JSON.stringify({"submit_group_config":selected_group_config,"submit_group":selected_group})
+            }
+
+           $.ajax({
+                type: "post",
+                url: "/remote",
+                async: false,
+                data:data,
+                dataType: 'JSON',
+                success: function (data, status) {
+                   if (status == "success"){
+                   }
+                },
+                complete: function () {
+                    $('#downconfig-modal').modal('hide');
+                }
+            });
+        });
 
         </script>
+
+    <script type="text/javascript" src="/static/bootstrap/js/bootstrap-dropdown.js"></script>
+
 
 {% endblock %}

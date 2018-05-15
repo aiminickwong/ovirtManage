@@ -266,7 +266,7 @@ RFB.prototype = {
     connect: function (host, port, password, path) {
         this._rfb_host = host;
         this._rfb_port = port;
-	this._rfb_password = "12345678";
+	this._rfb_password = "888888";
         this._rfb_path = (path !== undefined) ? path : "";
 
         if (!this._rfb_host || !this._rfb_port) {

@@ -38,10 +38,8 @@ def system():
         if  any(data_shutdown):
             try:
                 is_shutdown=json.loads(data_shutdown)["is-shutdown"]
-		print(is_shutdown)
                 if is_shutdown =='shutdown':
                     message = commands.getstatusoutput('shutdown -h now')
-		    print(message)
                 return simplejson.dumps({"message": message})
             except:
                 print 'None'
@@ -51,8 +49,6 @@ def system():
         if  any(data_reboot):
             try:
                 is_reboot=json.loads(data_reboot)["is-reboot"]
-		print('is---reboot?')
-		print(is_reboot)
                 if is_reboot =='reboot':
                     message = commands.getstatusoutput('reboot')
 	
@@ -426,6 +422,7 @@ def load_group():
             data = cursor.fetchall()
 
             jsonData = []
+	    
             for n, row in enumerate(data):
                 result = {}
                 result['text'] = row[0]
@@ -436,8 +433,6 @@ def load_group():
             return json.dumps(jsonData)
         except:
             db.rollback()
-
-
 
 #返回终端机信息
 @main.route('/machine_load_return_json',methods=['GET','POST'])
@@ -460,15 +455,11 @@ def load_machines():
 		result['id'] = n
 
                 jsonData.append(result)
-
-
             return json.dumps(jsonData)
         except:
             db.rollback()
 
-
-
-ALLOWED_EXTENSIONS = set(['iso','txt','sql'])
+ALLOWED_EXTENSIONS = set(['iso','txt','sql', 'gz'])
 IGNORED_FILES = set(['.gitignore'])
 
 
@@ -483,8 +474,6 @@ def gen_file_name(filename):
     """
     If file was exist already, rename it and return a new name
     """
-
-    print '生成文件名', os.path.join(os.getcwd(),app.config['UPLOAD_FOLDER'], filename)
     i = 1
     while os.path.exists(os.path.join(os.getcwd(),app.config['UPLOAD_FOLDER'], filename)):
         name, extension = os.path.splitext(filename)
@@ -501,7 +490,6 @@ def iso_upload():
         os.mkdir('/home/iso_file')
 
     if request.method == 'POST':
-        print 'upload iso'
         file = request.files['file']
         if fet-pwdle:
             filename = secure_filename(file.filename)
@@ -515,9 +503,7 @@ def iso_upload():
 
             else:
                 # save file to disk  os.getcwd()获取当前脚本路径
-                print "保存文件", os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 uploaded_file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                print "uploaded_file_path", uploaded_file_path
                 file.save(uploaded_file_path)
 
                 # get file size after saving
@@ -526,7 +512,6 @@ def iso_upload():
                 # 在saving后保存上传日期和路径
                 # 获取系统时间
                 #get_time = time.strftime('%Y-%m-%d', time.localtime(time.time()))
-                #print '----',datetime.utcnow()
                 #upload_date = get_time
 
                 if '.' in filename:
@@ -542,10 +527,6 @@ def iso_upload():
             return simplejson.dumps({"files": [result.get_file()]})
 
     if request.method == 'GET':
-        print "GET"
-
-
-
         # get all file in ./data directory
         files = [f for f in os.listdir(os.path.join(app.config['UPLOAD_FOLDER'])) if
                  os.path.isfile(os.path.join(app.config['UPLOAD_FOLDER'], f)) and f not in IGNORED_FILES]
@@ -673,7 +654,6 @@ def change_ip():
 			for line in f.readlines()[:2]:
 			    route_data += line
 
-
                     with open(route) as f:
 			for line in f.readlines()[2:]:
 		            #get_line = line.split(' ')
@@ -691,9 +671,7 @@ def change_ip():
 
                     pattern = r'(?<![\.\d])(?:\d{1,3}\.){3}\d{1,3}(?![\.\d])'
                     out = re.sub(pattern,'%s'%ipaddr,lines[2])
-
 		    lines[-1] = out
-
 
                     with open(host,'w') as f:
                         f.writelines(lines)
@@ -701,10 +679,8 @@ def change_ip():
 		    network = commands.getstatusoutput('service network restart')
 		    #ovirtengine = commands.getstatusoutput('service ovirt-engine restart')
 
-
 	    except Exception as e:
 		print e
-
 
     return render_template('index/change_ip.html',ipaddr=ip_mask_gate[0],netmask=ip_mask_gate[1],gateway=ip_mask_gate[2],hostname=hostname)
 
@@ -727,22 +703,22 @@ def ret_server_ip():
 
 
     def novnc_pwd():
-	with open("vnc/noVNC/vnc_lite.html",'r') as f:
-    	    htmlstr = f.read()
+	#with open("vnc/noVNC/vnc_lite.html",'r') as f:
+    	    #htmlstr = f.read()
 
 	#获取终端密码
 	get_vnc_pwd = request.form.get('vnc_pwd_data','')
 	vnc_pwd = json.loads(get_vnc_pwd)["pwd"]
+	#html_output = re.sub(r'<input type=password size=10 id="password_input" class="noVNC_status" value="\w+">',r'<input type=password size=10 id="password_input" class="noVNC_status" value="%s">'%(vnc_pwd),htmlstr)
 
-	html_output = re.sub(r'<input type=password size=10 id="password_input" class="noVNC_status" value="">','<input type=password size=10 id="password_input" class="noVNC_status" value="%s">'%(vnc_pwd),htmlstr)
+        #with open("vnc/noVNC/vnc_lite.html",'w') as fw:
+    	    #fw.write(html_output)
 
-        with open("vnc/noVNC/vnc_lite.html",'w') as fw:
-    	    fw.write(html_output)
-
+	# 只需要修改rfb.js中的密码
   	with open("vnc/noVNC/core/rfb.js",'r') as f:
 	    jsstr = f.read()
 
-	js_output = re.sub(r'this._rfb_password = "";','this._rfb_password = "%s";'%(vnc_pwd),jsstr)
+	js_output = re.sub(r'this._rfb_password = "\w+";','this._rfb_password = "%s";'%(vnc_pwd),jsstr)
 
 	with open("vnc/noVNC/core/rfb.js",'w') as fw:
 	    fw.write(js_output)
@@ -756,11 +732,123 @@ def ret_server_ip():
 @login_required
 def remote():
 
+    # 后台自动扫描终端机 与服务器一致的网段
+    scan_ip = commands.getstatusoutput("ifconfig ovirtmgmt | grep 'inet' | awk -F ' ' '{print $2}' ")
+    #print('scan_ip', scan_ip[1].split('\n')[0].split('.'))
+    ip1 = scan_ip[1].split('\n')[0].split('.')[0]
+    ip2 =  scan_ip[1].split('\n')[0].split('.')[1]
+    ip3 = scan_ip[1].split('\n')[0].split('.')[2]
+
+    for i in range(1,255):
+        auto_search = os.popen('tcmclient  %s.%s.%s.%s --scani&'%(ip1,ip2,'129',i))
+
+
+    db = MySQLdb.connect('localhost','root','uroot012','ovirt_development',charset='utf8')
+    cursor = db.cursor()
+
+    def read_file(file_path):
+        with open(file_path,'r') as f:
+            for line in f.readlines():
+                if(line.find('CLIENT_MAC')==0):
+                    CLIENT_MAC = line.strip().split('=',1)[1]
+                if(line.find('CLIENT_VNCPWD')==0):
+                    CLIENT_VNCPWD = line.strip().split('=',1)[1]
+                if(line.find('CLIENT_CFGPWD')==0):
+                    CLIENT_CFGPWD = line.strip().split('=',1)[1]
+                if(line.find('CLIENT_DFAPP')==0):
+                    CLIENT_DFAPP = line.strip().split('=',1)[1]
+                if(line.find('CLIENT_DFSRV')==0):
+                    CLIENT_DFSRV = line.strip().split('=',1)[1]
+                if(line.find('CLIENT_MEM')==0):
+                    CLIENT_MEM = line.strip().split('=',1)[1]
+                if(line.find('CLIENT_GPU')==0):
+                    CLIENT_GPU = line.strip().split('=',1)[1]
+                if(line.find('CLIENT_CPU')==0):
+                    CLIENT_CPU = line.strip().split('=',1)[1]
+                if(line.find('CLIENT_NIC')==0):
+                    CLIENT_NIC = line.strip().split('=',1)[1]
+                if(line.find('CLIENT_OS')==0):
+                    CLIENT_OS = line.strip().split('=',1)[1]
+                if(line.find('CLIENT_Model')==0):
+                    CLIENT_Model = line.strip().split('=',1)[1]
+                if(line.find('CLIENT_STORAGE')==0):
+                    CLIENT_STORAGE = line.strip().split('=',1)[1]
+                if(line.find('CLIENT_KERNEL')==0):
+                    CLIENT_KERNEL = line.strip().split('=',1)[1]
+                if(line.find('CLIENT_IP')==0):
+                    CLIENT_IP = line.strip().split('=',1)[1]
+                if(line.find('CLIENT_AUDIO')==0):
+                    CLIENT_AUDIO = line.strip().split('=',1)[1]
+                if(line.find('CLIENT_VERSION')==0):
+                    CLIENT_VERSION = line.strip().split('=',1)[1]
+                if(line.find('CLIENT_NAME')==0):
+                    CLIENT_NAME = line.strip().split('=',1)[1]
+                if(line.find('CLIENT_FREQ')==0):
+                    CLIENT_FREQ = line.strip().split('=',1)[1]
+                if(line.find('CLIENT_DISPLAY')==0):
+                    CLIENT_DISPLAY = line.strip().split('=',1)[1]
+                if(line.find('CLIENT_OPT')==0):
+                    CLIENT_OPT = line.strip().split('=',1)[1]
+                if(line.find('CLIENT_SESSION_0_TYPE')==0):
+                    CLIENT_SESSION_0_TYPE = line.strip().split('=',1)[1]
+                if(line.find('CLIENT_LANGUAGE')==0):
+                    CLIENT_LANGUAGE = line.strip().split('=',1)[1]
+
+            try:
+                cursor.execute("select 1 from assets where CLIENT_MAC = '%s' limit 1"%(CLIENT_MAC))
+                data = cursor.fetchone()
+            except:
+                db.rollback()    
+    
+            update_sql = "update assets set CLIENT_VNCPWD='%s',CLIENT_CFGPWD='%s',CLIENT_DFAPP='%s',CLIENT_DFSRV='%s',CLIENT_MEM='%s',CLIENT_GPU='%s',CLIENT_CPU='%s',CLIENT_NIC='%s',CLIENT_OS='%s',CLIENT_Model='%s',CLIENT_STORAGE='%s',CLIENT_KERNEL='%s',CLIENT_IP='%s',CLIENT_AUDIO='%s',CLIENT_VERSION='%s',CLIENT_NAME='%s',CLIENT_FREQ='%s',CLIENT_DISPLAY='%s',CLIENT_OPT='%s',CLIENT_SESSION_0_TYPE='%s',CLIENT_LANGUAGE='%s' where CLIENT_MAC='%s'"%(str(CLIENT_VNCPWD),str(CLIENT_CFGPWD),str(CLIENT_DFAPP),str(CLIENT_DFSRV),str(CLIENT_MEM),str(CLIENT_GPU),str(CLIENT_CPU),str(CLIENT_NIC),str(CLIENT_OS),str(CLIENT_Model),str(CLIENT_STORAGE),str(CLIENT_KERNEL),str(CLIENT_IP),str(CLIENT_AUDIO),str(CLIENT_VERSION),str(CLIENT_NAME),str(CLIENT_FREQ),str(CLIENT_DISPLAY),str(CLIENT_OPT),str(CLIENT_SESSION_0_TYPE),str(CLIENT_LANGUAGE),str(CLIENT_MAC))
+
+            insert_sql = "insert into assets(CLIENT_MAC,CLIENT_VNCPWD,CLIENT_CFGPWD,CLIENT_DFAPP,CLIENT_DFSRV,CLIENT_MEM,CLIENT_GPU,CLIENT_CPU,CLIENT_NIC,CLIENT_OS,CLIENT_Model,CLIENT_STORAGE,CLIENT_KERNEL,CLIENT_IP,CLIENT_AUDIO,CLIENT_VERSION,CLIENT_NAME,CLIENT_FREQ,CLIENT_DISPLAY,CLIENT_OPT,CLIENT_SESSION_0_TYPE,CLIENT_LANGUAGE,CLIENT_GROUP)" + 'values("%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s");' %(str(CLIENT_MAC),str(CLIENT_VNCPWD),str(CLIENT_CFGPWD),str(CLIENT_DFAPP),str(CLIENT_DFSRV),str(CLIENT_MEM),str(CLIENT_GPU),str(CLIENT_CPU),str(CLIENT_NIC),str(CLIENT_OS),str(CLIENT_Model),str(CLIENT_STORAGE),str(CLIENT_KERNEL),str(CLIENT_IP),str(CLIENT_AUDIO),str(CLIENT_VERSION),str(CLIENT_NAME),str(CLIENT_FREQ),str(CLIENT_DISPLAY),str(CLIENT_OPT),str(CLIENT_SESSION_0_TYPE),str(CLIENT_LANGUAGE),"")
+
+            if data is not None:
+                sql = update_sql
+            else:
+                sql = insert_sql
+
+            return sql
+
+    '''
+        函数说明:执行sql操作
+    '''
+    def db_execute(sql):
+        try:
+            cursor.execute(sql)
+            db.commit()
+        except:
+            db.rollback()
+
+    def search_file():
+        filenames = os.listdir('/var/lib/tftpboot/asset')
+        if filenames != " ":
+            for filename in filenames:
+                sql_lines = read_file('/var/lib/tftpboot/asset/%s'%filename)
+                db_execute(sql_lines)
+
+    def write_vnc_tokens():
+        sql = "select CLIENT_NAME,CLIENT_IP from assets"
+        try:
+            cursor.execute(sql)
+            data = cursor.fetchall()
+            token_file = os.getcwd() + "/vnc/noVNC/vnc_tokens"
+            with open(token_file,'w') as f:
+                for row in data:
+                    f.write("%s: %s:5900 \n"%(row[0],row[1]))
+
+            cursor.close()
+        except:
+            db.rollback()
+
+    search_file()
+    write_vnc_tokens()
+
+
     if request.method == 'POST':
         db = MySQLdb.connect('localhost','root','uroot012','ovirt_development',charset='utf8')
         cursor = db.cursor()      
-
-
 
 	#若不存在，生成资产表
         create_assets_sql = """CREATE TABLE IF NOT EXISTS `assets` (
@@ -813,179 +901,74 @@ def remote():
 	        ipaddr_3 = form_data['ipaddr_3']
 
                 if ipaddr_1 and ipaddr_2 and ipaddr_3 != "":
-	     	    #print('run search...')
-
 		    def search_task():
                         for i in range(1,255):
-                            #print('Search... ip:%s'%i)
 			    #这里不用commands命令,会出现问题
    		            search = os.popen('tcmclient  %s.%s.%s.%s --scani&'%(ipaddr_1,ipaddr_2,ipaddr_3,i))
 
 	        search_task()
 
-   	        print('search done')
             except Exception as e:
                print e
 
-            def read_file(file_path):
-                with open(file_path,'r') as f:
-	            for line in f.readlines():
-	                if(line.find('CLIENT_MAC')==0):
-	                    CLIENT_MAC = line.strip().split('=',1)[1]
-                        if(line.find('CLIENT_VNCPWD')==0):
-	                    CLIENT_VNCPWD = line.strip().split('=',1)[1]
-                        if(line.find('CLIENT_CFGPWD')==0):
-	                    CLIENT_CFGPWD = line.strip().split('=',1)[1]
-                        if(line.find('CLIENT_DFAPP')==0):
-	                    CLIENT_DFAPP = line.strip().split('=',1)[1]
-                        if(line.find('CLIENT_DFSRV')==0):
-                            CLIENT_DFSRV = line.strip().split('=',1)[1]
-                        if(line.find('CLIENT_MEM')==0):
-	                    CLIENT_MEM = line.strip().split('=',1)[1]
-                        if(line.find('CLIENT_GPU')==0):
-	                    CLIENT_GPU = line.strip().split('=',1)[1]
-                        if(line.find('CLIENT_CPU')==0):
-	                    CLIENT_CPU = line.strip().split('=',1)[1]
-                        if(line.find('CLIENT_NIC')==0):
-	                    CLIENT_NIC = line.strip().split('=',1)[1]
-                        if(line.find('CLIENT_OS')==0):
-	                    CLIENT_OS = line.strip().split('=',1)[1]
-                        if(line.find('CLIENT_Model')==0):
-	                    CLIENT_Model = line.strip().split('=',1)[1]
-                        if(line.find('CLIENT_STORAGE')==0):
-	                    CLIENT_STORAGE = line.strip().split('=',1)[1]
-                        if(line.find('CLIENT_KERNEL')==0):
-	                    CLIENT_KERNEL = line.strip().split('=',1)[1]
-                        if(line.find('CLIENT_IP')==0):
-	                    CLIENT_IP = line.strip().split('=',1)[1]
-                        if(line.find('CLIENT_AUDIO')==0):
-	                    CLIENT_AUDIO = line.strip().split('=',1)[1]
-                        if(line.find('CLIENT_VERSION')==0):
-	                    CLIENT_VERSION = line.strip().split('=',1)[1]
-                        if(line.find('CLIENT_NAME')==0):
-	                    CLIENT_NAME = line.strip().split('=',1)[1]
-                        if(line.find('CLIENT_FREQ')==0):
-	                    CLIENT_FREQ = line.strip().split('=',1)[1]
-                        if(line.find('CLIENT_DISPLAY')==0):
-	                    CLIENT_DISPLAY = line.strip().split('=',1)[1]
-                        if(line.find('CLIENT_OPT')==0):
-	                    CLIENT_OPT = line.strip().split('=',1)[1]
-                        if(line.find('CLIENT_SESSION_0_TYPE')==0):
-	                    CLIENT_SESSION_0_TYPE = line.strip().split('=',1)[1]
-                        if(line.find('CLIENT_LANGUAGE')==0):
-	                    CLIENT_LANGUAGE = line.strip().split('=',1)[1]
-
-                try:
-                    cursor.execute("select 1 from assets where CLIENT_MAC = '%s' limit 1"%(CLIENT_MAC))
-                    data = cursor.fetchone()
-                except:
-                    db.rollback()
-
-	        update_sql = "update assets set CLIENT_VNCPWD='%s',CLIENT_CFGPWD='%s',CLIENT_DFAPP='%s',CLIENT_DFSRV='%s',CLIENT_MEM='%s',CLIENT_GPU='%s',CLIENT_CPU='%s',CLIENT_NIC='%s',CLIENT_OS='%s',CLIENT_Model='%s',CLIENT_STORAGE='%s',CLIENT_KERNEL='%s',CLIENT_IP='%s',CLIENT_AUDIO='%s',CLIENT_VERSION='%s',CLIENT_NAME='%s',CLIENT_FREQ='%s',CLIENT_DISPLAY='%s',CLIENT_OPT='%s',CLIENT_SESSION_0_TYPE='%s',CLIENT_LANGUAGE='%s' where CLIENT_MAC='%s'"%(str(CLIENT_VNCPWD),str(CLIENT_CFGPWD),str(CLIENT_DFAPP),str(CLIENT_DFSRV),str(CLIENT_MEM),str(CLIENT_GPU),str(CLIENT_CPU),str(CLIENT_NIC),str(CLIENT_OS),str(CLIENT_Model),str(CLIENT_STORAGE),str(CLIENT_KERNEL),str(CLIENT_IP),str(CLIENT_AUDIO),str(CLIENT_VERSION),str(CLIENT_NAME),str(CLIENT_FREQ),str(CLIENT_DISPLAY),str(CLIENT_OPT),str(CLIENT_SESSION_0_TYPE),str(CLIENT_LANGUAGE),str(CLIENT_MAC))
-
-                insert_sql = "insert into assets(CLIENT_MAC,CLIENT_VNCPWD,CLIENT_CFGPWD,CLIENT_DFAPP,CLIENT_DFSRV,CLIENT_MEM,CLIENT_GPU,CLIENT_CPU,CLIENT_NIC,CLIENT_OS,CLIENT_Model,CLIENT_STORAGE,CLIENT_KERNEL,CLIENT_IP,CLIENT_AUDIO,CLIENT_VERSION,CLIENT_NAME,CLIENT_FREQ,CLIENT_DISPLAY,CLIENT_OPT,CLIENT_SESSION_0_TYPE,CLIENT_LANGUAGE,CLIENT_GROUP)" + 'values("%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s");' %(str(CLIENT_MAC),str(CLIENT_VNCPWD),str(CLIENT_CFGPWD),str(CLIENT_DFAPP),str(CLIENT_DFSRV),str(CLIENT_MEM),str(CLIENT_GPU),str(CLIENT_CPU),str(CLIENT_NIC),str(CLIENT_OS),str(CLIENT_Model),str(CLIENT_STORAGE),str(CLIENT_KERNEL),str(CLIENT_IP),str(CLIENT_AUDIO),str(CLIENT_VERSION),str(CLIENT_NAME),str(CLIENT_FREQ),str(CLIENT_DISPLAY),str(CLIENT_OPT),str(CLIENT_SESSION_0_TYPE),str(CLIENT_LANGUAGE),"")
-
-                if data is not None:
-		    sql = update_sql
-	            print('更新assets')
-	        else:
-		    sql = insert_sql
-		    print('写入assets')
-
-	        return sql
-
-            def db_execute(sql):
-                try:
-                    cursor.execute(sql)
-                    db.commit()
-                except:
-                    db.rollback()
-
-            def write_vnc_tokens():
-	        print('写入vnc_tokens')
-                sql = "select CLIENT_NAME,CLIENT_IP from assets"
-	        try:
-	            cursor.execute(sql)
-	            data = cursor.fetchall()
-		    token_file = os.getcwd() + "/vnc/noVNC/vnc_tokens"
-	      	    with open(token_file,'w') as f:
-		        for row in data:
-		            f.write("%s: %s:5900 \n"%(row[0],row[1]))
-
-    	            cursor.close()
-	        except:
-	            db.rollback()
-
-
-            def search_file():
-                filenames = os.listdir('/var/lib/tftpboot/')
-                if filenames != " ":
-                    for filename in filenames:
-                        sql_lines = read_file('/var/lib/tftpboot/%s'%filename)
-                        db_execute(sql_lines)
-
             search_file()
-	    print('搜索完成')
 	    write_vnc_tokens()
 
 	#加入到分组
 	add_to_group_users = request.form.get('users_data', '')
-
 	if any(add_to_group_users):
-
 	    groupName =  json.loads(add_to_group_users)["selected_group"]
 	    select_users = json.loads(add_to_group_users)["select_users"]
-
-	    print(groupName)
-	    print(select_users)
             for i in select_users:
 	        try:
 	            cursor.execute("UPDATE assets SET CLIENT_GROUP='%s' WHERE CLIENT_NAME='%s' "%(groupName,i))
 	            db.commit()
 	        except Exception, e:
-		    print('错误')
 		    print(e)
 
 		    db.rollback()
 
-	        print('加入成功')
+
+        #移出分组
+        add_remove_group_users = request.form.get('remove_users_from_group_data', '')
+        if any(add_remove_group_users):
+            select_users = json.loads(add_remove_group_users)["selected_users"]
+            for i in select_users:
+		print('i',i)
+                try:
+                    cursor.execute("UPDATE assets SET CLIENT_GROUP='' WHERE CLIENT_NAME='%s' "%(i))
+                    db.commit()
+                except Exception, e:
+                    print(e)
+
+                    db.rollback()
+
 
 
 	#删除瘦客户机
 	del_users = request.form.get('del_users', '')
-
-
         if any(del_users):
-
-	    users = json.loads(del_users)["del_users"]
-
-	    for i in users:
+	    macs = json.loads(del_users)["select_mac"]
+	    for i in macs:
+	  	print('macmac', i)
                 try:
-		    print('删除')
-
-                    cursor.execute("DELETE FROM assets WHERE CLIENT_NAME='%s' "%(i))
+                    cursor.execute("DELETE FROM assets WHERE CLIENT_MAC='%s' "%(i))
                     db.commit()
                 except:
                     db.rollback()
 
 	    #删除对应的瘦客户机文本文件
 	    mac = json.loads(del_users)["select_mac"]
-	    print('mac')
-	    print(mac)
 	    try:
 	        for i in mac:
-		    print(i)
-	            os.remove('/var/lib/tftpboot/%s'%i)
+	            os.remove('/var/lib/tftpboot/asset/%s'%i)
 	    except Exception,e:
 	        print('文件已删除')
 
 	#唤醒瘦客户机
         awakeMac = request.form.get('awakesMacData', '')
-
-
 	if any(awakeMac):
             mac = json.loads(awakeMac)["awakeMac"]
-
 	    #广播地址 数据包发送到本地子网的广播地址（代码中为：172.16.255.255）的UDP端口9即可唤醒该PC
    	    broadcast = commands.getstatusoutput("ifconfig ovirtmgmt | grep 'inet' | awk -F ' ' '{print $6}' ")
 	    dest = (broadcast[1], 9)
@@ -1003,22 +986,86 @@ def remote():
 
 	    s.close()
 
+        #重启瘦客户机
+        rebootIp = request.form.get('rebootIpData', '')
+        if any(rebootIp):
+            ip = json.loads(rebootIp)["rebootIp"]
+	    [os.popen('tcmclient  %s --rebooti&'%(i)) for i in ip]
 
+
+        #关闭瘦客户机
+        shutdownIp = request.form.get('shutdownIpData', '')
+        if any(shutdownIp):
+            ip = json.loads(shutdownIp)["shutdownIp"]
+	    [os.popen('tcmclient  %s --shutdowni&'%(i)) for i in ip]
+	    #shut = os.popen('tcmclient  %s --shutdowni&'%(ip[0]))
+
+
+        #上传瘦客户机配置
+        upload_ip = request.form.get('uploadIpData', '')
+        if any(upload_ip):
+            ip = json.loads(upload_ip)["uploadIp"]
+	    upload_config =  os.popen('tcmclient  %s --upconfig'%(ip[0]))
+	    upload_result  = upload_config.readlines()
+	    file_path = '/var/lib/tftpboot/xConfig'
+	    if upload_result[0] == 'true\n':
+                config_files = os.listdir(file_path)
+	        for con in config_files:
+		    if 'tar' in con:
+		        # 返回的文件名是否已存在xconfigs表中
+	                try:
+                            cursor.execute("INSERT IGNORE INTO xconfigs(CONFIG_NAME,CONFIG_REMARK) VALUES('%s','')"%(con))
+                            db.commit()
+                        except Exception,e:
+			    print e
+                            db.rollback()
+
+	                    # 保存命令运行后的结果
+		        # '复制文件到static目录下'
+			os.popen("cp %s/%s %s/app/static/data/profiles/"%(file_path, con, os.getcwd()))           
+                        
+                return simplejson.dumps({"upconfig_result":"succeed"})
+            else:
+                return simplejson.dumps({"upconfig_result":"failed"})
+	
+	#分发瘦客户机配置
+	down_ip = request.form.get('sub_config_data', '')
+        if any(down_ip):
+            config = json.loads(down_ip)["submit_config"]
+	    ip = json.loads(down_ip)["submit_ip"]
+
+	    write_ixconfig = config.split('-')[0]
+	    if write_ixconfig == "ixConfig":
+	        split_by = config.split('.', 1)
+		to_xconfig = split_by[0].split('ix', 1)
+		# 把分发配置文件写入ixConfig	        
+	        with open('/var/lib/tftpboot/xConfig/ixConfig', 'w') as f:
+ 		    f.write(to_xconfig[1])
+	    else:
+                split_by = config.split('.', 1)
+                to_xconfig = split_by[0].split('vx', 1)
+                # 把分发配置文件写入ixConfig            
+                with open('/var/lib/tftpboot/xConfig/vxConfig', 'w') as f:
+                    f.write(to_xconfig[1])
+
+	    # 执行tcmclient分发命令
+	    for i in ip:
+	        os.popen('tcmclient  %s --downconfig'%(i))
+	    
+            # 保存命令运行后的结果
+            #down_result = []
+            #for line in down_config.readlines():
+            #down_result.append(line)
+	
+	
 	#分组管理：添加分组
         add = request.form.get('addGroupData', '')
-
-	print(add)
-
         if any(add):
 	    groupName = json.loads(add)["add-group-data"]['addGroupName']
             remarks = json.loads(add)["add-group-data"]['remarks']
-	    print(groupName)
-	    print(remarks)
 
 	    try:
-	        print('insert')
                 add_group_sql = "INSERT INTO groupmanage(GROUP_NAME,GROUP_REMARK) VALUE ('%s','%s') "%(groupName,remarks)
-	        print(add_group_sql)
 	        cursor.execute(add_group_sql)
 	        db.commit()
 	    except:
@@ -1027,24 +1074,16 @@ def remote():
 
         #分组管理：更改信息
         update = request.form.get('updateGroupData', '')
-
-        print(update)
-
         if any(update):
             selectGroupName = json.loads(update)["selectGroup"][0]
 	    newGroupName = json.loads(update)["update-group-data"]['groupName']
             remarks = json.loads(update)["update-group-data"]['remarks']
             
-	    print(selectGroupName)
-	    print(newGroupName)
-            print(remarks)
             #db = MySQLdb.connect('localhost','root','uroot012','ovirt_development',charset='utf8')
             #cursor = db.cursor()
 
             try:
-                print('update')
                 update_group_sql = "UPDATE groupmanage SET GROUP_NAME='%s',GROUP_REMARK='%s' WHERE GROUP_NAME='%s' "%(newGroupName,remarks,selectGroupName)
-                print(update_group_sql)
                 cursor.execute(update_group_sql)
                 db.commit()
             except:
@@ -1072,11 +1111,8 @@ def remote():
 
         #唤醒分组
         awakeGroup = request.form.get('awakesGroupData', '')
-
-
         if any(awakeGroup):
-
-            #广播地址 数据包发送到本地子网的广播地址（代码中为：172.16.255.255）的UDP端口9即可唤醒
+            #广播地址 数据包发送到本地子网的广播地址（代码中为：172.16.128.255）的UDP端口9即可唤醒
             broadcast = commands.getstatusoutput("ifconfig ovirtmgmt | grep 'inet' | awk -F ' ' '{print $6}' ")
             dest = (broadcast[1], 9)
 
@@ -1090,7 +1126,6 @@ def remote():
             group = json.loads(awakeGroup)["awakeGroup"]
 
 	    for i in group:
-		print(i)
                 try:
                     cursor.execute("SELECT CLIENT_MAC FROM assets WHERE CLIENT_GROUP='%s' "%(i))
 
@@ -1100,84 +1135,185 @@ def remote():
         	    for n, row in enumerate(data):
 			awake_group.append(row[0])
 
-		    for group in awake_group:
-			print('唤醒:' + group)
-            		sendto(binascii.unhexlify('FF'*6+group*16 +'00'*6))
+		    for g in awake_group:
+			print('唤醒:' + g)
+            		sendto(binascii.unhexlify('FF'*6+g*16 +'00'*6))
             		s.close()
 
                 except:
                     db.rollback()
 	
+        #重启分组
+        rebootGroup = request.form.get('rebootGroupData', '')
+        if any(rebootGroup):
+            groups = json.loads(rebootGroup)["rebootGroup"]
+            for group in groups:
+                try:
+                    cursor.execute("SELECT CLIENT_IP FROM assets WHERE CLIENT_GROUP='%s' "%(group))
+
+                    data = cursor.fetchall()
+
+                    reboot_group = []
+                    for n, row in enumerate(data):
+                        reboot_group.append(row[0])
+
+                    [os.popen('tcmclient  %s --rebooti&'%(ip)) for ip in reboot_group]
+                except:
+                    db.rollback()
+
+
+        #关闭分组
+        shutdownGroup = request.form.get('shutdownGroupData', '')
+        if any(shutdownGroup):
+	    groups = json.loads(shutdownGroup)["shutdownGroup"]
+	    for group in groups:
+	        try:
+                    cursor.execute("SELECT CLIENT_IP FROM assets WHERE CLIENT_GROUP='%s' "%(group))
+
+                    data = cursor.fetchall()
+
+                    shutdown_group = []
+                    for n, row in enumerate(data):
+                        shutdown_group.append(row[0])
+
+                    [os.popen('tcmclient  %s --shutdowni&'%(ip)) for ip in shutdown_group]	
+                    #for ip  in shutdown_group:
+                except:
+                    db.rollback()
+
+
+        # 为组分发配置
+        downconfigGroup = request.form.get('sub_config_group_data', '')
+        if any(downconfigGroup):
+            group_config = json.loads(downconfigGroup)["submit_group_config"]
+	    group_name = json.loads(downconfigGroup)["submit_group"]
+	    write_ixconfig = group_config.split('-')[0]
+            if write_ixconfig == "ixConfig":
+                split_by = group_config.split('.', 1)
+                to_xconfig = split_by[0].split('ix', 1)
+                # 把分发配置文件写入ixConfig            
+                with open('/var/lib/tftpboot/xConfig/ixConfig', 'w') as f:
+                    f.write(to_xconfig[1])
+            else:
+                split_by = group_config.split('.', 1)
+                to_xconfig = split_by[0].split('vx', 1)
+                # 把分发配置文件写入ixConfig            
+                with open('/var/lib/tftpboot/xConfig/vxConfig', 'w') as f:
+                    f.write(to_xconfig[1])
+
+   	    for group in group_name:
+                try:
+                    cursor.execute("SELECT CLIENT_IP FROM assets WHERE CLIENT_GROUP='%s' "%(group))
+
+                    data = cursor.fetchall()
+
+                    downconfig_group = []
+                    for n, row in enumerate(data):
+                        downconfig_group.append(row[0])
+
+                    [os.popen('tcmclient  %s --downconfigi&'%(ip)) for ip in downconfig_group]
+                    for ip  in downconfig_group:
+                        print(' 分发配置:' + ip)
+                except:
+                    db.rollback()
+
 	#备份资产信息
 	backup = request.form.get('backup','')
 
 	if backup == "backup":
 	    os.popen("mysqldump -uroot  -p'%s' ovirt_development assets groupmanage > %s/app/static/data/sql/assets.sql"%("uroot012",os.getcwd()))	
 
-
-
 	# !!!!!!!!  这里出了400问题！！# !!!!!!!!
-	
 	#file = request.values.get("form_data")
 	try:
 	    file=request.files['assetfile']
-	    #file = request.form.get('FormData','')
-	    print('wenjian')
-	    print(file)
 
             if file:
                 print('上传资产信息')
-	        print(file)
-                print(file.filename)
-                filename = secure_filename(file.filename)
-                filename = gen_file_name(filename)
-                print('filename:')
-                print(filename)
+                filename = gen_file_name(file.filename)
                 mimetype = file.content_type
 
                 if not allowed_file(file.filename):
-
                     result = uploadfile(name=filename, type=mimetype, size=0, not_allowed_msg="不支持的文件类型")
                     print("文件类型不支持")
                 else:
                     uploaded_file_path = os.path.join("%s/app/static/data/uploadsql"%os.getcwd(), filename)
-                    print(uploaded_file_path)
                     os.popen("rm -rf %s/app/static/data/uploadsql/*"%os.getcwd())
                     file.save(uploaded_file_path)
-                    print('save')
 
                     files = os.listdir("%s/app/static/data/uploadsql"%os.getcwd())
-                    print(files)
                     os.popen("mysql -uroot  -p'%s' ovirt_development < %s/app/static/data/uploadsql/%s"%("uroot012",os.getcwd(),files[0]))
 
         except Exception,e:
 	    print(e)
-	    print('没文件')
+
+	# 导入配置文件
+
+        try:
+            profile=request.files['profile']
+
+            if profile:
+                print('导入配置文件')
+                filename = gen_file_name(profile.filename)
+                mimetype = profile.content_type
+
+                if not allowed_file(profile.filename):
+                    result = uploadfile(name=filename, type=mimetype, size=0, not_allowed_msg="不支持的文件类型")
+                    print("文件类型不支持")
+                else:
+                    uploaded_file_path = os.path.join("%s/app/static/data/profiles"%os.getcwd(), filename)
+                    profile.save(uploaded_file_path)
+		    uploaded_file_path_local = "/var/lib/tftpboot/xConfig/%s"%filename
+		    profile.save(uploaded_file_path_local)
+
+                    config_files = os.listdir("/var/lib/tftpboot/xConfig/")
+                    for con in config_files:
+                        if 'tar' in con:
+                            # 返回的文件名是否已存在xconfigs表中
+                            try:
+                                cursor.execute("INSERT IGNORE INTO xconfigs(CONFIG_NAME,CONFIG_REMARK) VALUES('%s','')"%(con))
+                                db.commit()
+                            except Exception,e:
+                                print e
+                                db.rollback()
+
+        except Exception,e:
+            print(e)
+
+
+	# 修改配置文件备注
+	config_name = request.form.get('config_row[CONFIG_NAME]', '')
+	config_remark = request.form.get('config_row[CONFIG_REMARK]', '')
+	if config_name != "":
+	    try:
+                cursor.execute("UPDATE xconfigs set CONFIG_REMARK='%s' where CONFIG_NAME='%s'"%(config_remark,config_name))
+                db.commit()
+            except Exception,e:
+                print e
+                db.rollback()
+
+	# 删除配置文件
+        delconfigGroup = request.form.get('delConfigData', '')
+        if any(delconfigGroup):
+           configs = json.loads(delconfigGroup)["delConfig"]
+	   for conf in configs:
+	       # 删除数据表
+               try:
+                   cursor.execute("DELETE FROM  xconfigs WHERE CONFIG_NAME='%s'"%(conf))
+                   db.commit()
+               except Exception,e:
+                   print e
+                   db.rollback()
+	       # 删除对应文件
+	       file_path = '/var/lib/tftpboot/xConfig/'
+	       delconfig = os.popen('rm -rf  %s/%s'%(file_path,conf))
+               os.popen('rm -rf  %s/app/static/data/profiles/%s'%(os.getcwd(),conf))
   
+	
 
 
-
-
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        db.close()
-			
+        # 最后再关闭
+        db.close()			
     return render_template('index/remote.html')
 
 import csv
@@ -1221,6 +1357,19 @@ def terminal_message():
 	    result['CLIENT_SESSION_0_TYPE'] = row[20]
 	    result['CLIENT_LANGUAGE'] = row[21]
 	    result['CLIENT_GROUP'] = row[22]
+
+            # 检测是否在线
+            # online = os.popen('fping %s'%(row[13]))
+            #CLIENT_STATUS = []
+            #for line in online.readlines():
+                #if 'alive' in line:
+                    #CLIENT_STATUS.append('在线')
+                #else:
+                    #CLIENT_STATUS.append('不在线')
+ 
+            #print('CLIENT_STATUS',row[13],CLIENT_STATUS)
+            #result['CLIENT_STATUS'] = CLIENT_STATUS[0]
+
 
             jsonData.append(result)
 
@@ -1348,3 +1497,62 @@ def client_group_message():
         db.rollback()
 
     db.close()
+
+
+#返回配置文件
+@main.route('/remote/return_configs', methods=['GET', 'POST'])
+@login_required
+def configs_message():
+    db = MySQLdb.connect('localhost','root','uroot012','ovirt_development',charset='utf8')
+    cursor = db.cursor()
+
+    search_sql =  "SELECT * FROM  xconfigs"
+
+    try:
+        cursor.execute(search_sql)
+        data = cursor.fetchall()
+
+        jsonData = []
+        for n, row in enumerate(data):
+            result = {}
+            result['CONFIG_NAME'] = row[0]
+            result['CONFIG_REMARK'] = row[1]
+
+            jsonData.append(result)
+
+
+        return json.dumps(jsonData)
+    except:
+        db.rollback()
+
+    db.close()
+
+
+#返回要分发的配置文件
+@main.route('/configs_load_return_json', methods=['GET', 'POST'])
+@login_required
+def configs_down():
+    db = MySQLdb.connect('localhost','root','uroot012','ovirt_development',charset='utf8')
+    cursor = db.cursor()
+
+    search_sql =  "SELECT * FROM  xconfigs"
+
+    try:
+        cursor.execute(search_sql)
+        data = cursor.fetchall()
+
+        jsonData = []
+        for n, row in enumerate(data):
+            result = {}
+            result['text'] = row[0] + ';' +row[1]
+            result['id'] = n
+
+            jsonData.append(result)
+
+
+        return json.dumps(jsonData)
+    except:
+        db.rollback()
+
+    db.close()
+
